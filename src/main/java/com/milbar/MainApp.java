@@ -22,7 +22,7 @@ public class MainApp extends javafx.application.Application {
         Parent rootNode = loader.load(getClass().getResourceAsStream(fxmlFile));
         Scene scene = new Scene(rootNode, 400, 200);
 
-        stage.setTitle("Patryk Milewski und Stanislaw Baranski");
+        stage.setTitle("Stanislaw Baranski 160518 und Patryk Milewski 160503");
         stage.setScene(scene);
         stage.show();
 
