@@ -1,6 +1,11 @@
 group 'com.milbar'
 version '1.0-SNAPSHOT'
 
+ext.junitPlatformVersion = '1.1.0'
+ext.junitJupiterVersion  = '5.1.0'
+ext.junit4Version        = '4.12'
+ext.junitVintageVersion  = '5.1.0'
+
 buildscript {
     ext.kotlin_version = '1.2.30'
 
@@ -12,11 +17,13 @@ buildscript {
     dependencies {
         classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.1.0'
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'kotlin'
+apply plugin: 'org.junit.platform.gradle.plugin'
 
 repositories {
     mavenCentral()
@@ -40,6 +47,15 @@ dependencies {
     implementation 'com.miglayout:miglayout-javafx:4.2'
     implementation 'commons-lang:commons-lang:2.6'
     compile 'com.github.stasbar:easy-logger:v1.0'
+    compile 'org.controlsfx:controlsfx:9.0.0'
+    testCompile "org.mockito:mockito-core:2.+"
+    // JUnit Jupiter API and TestEngine implementation
+    testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+
+    testCompile("junit:junit:${junit4Version}")
+    testRuntime("org.junit.vintage:junit-vintage-engine:${junitVintageVersion}")
+    testRuntime("org.junit.platform:junit-platform-launcher:${junitPlatformVersion}")
 }
 
 compileKotlin {

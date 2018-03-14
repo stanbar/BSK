@@ -1,4 +1,4 @@
-package com.milbar;
+package com.milbar.gui;
 
 
 import com.stasbar.Logger;
@@ -15,18 +15,17 @@ public class MainApp extends javafx.application.Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Logger.info("Starting JavaFX scene...");
+        Logger.info("Starting JavaFX main scene...");
 
-        String fxmlFile = "/com/milbar/" + MainController.class.getSimpleName() + ".fxml";
-        FXMLLoader loader = new FXMLLoader();
-        Parent rootNode = loader.load(getClass().getResourceAsStream(fxmlFile));
-        Scene scene = new Scene(rootNode, 400, 200);
+        String fxmlFile = "/fxml/" + MainController.class.getSimpleName() + ".fxml";
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        Parent rootNode = fxmlLoader.load(getClass().getResourceAsStream(fxmlFile));
+        Scene scene = new Scene(rootNode);
 
         stage.setTitle("Stanislaw Baranski 160518 und Patryk Milewski 160503");
         stage.setScene(scene);
         stage.show();
 
         Logger.info("Scene started successfully !");
-
     }
 }
