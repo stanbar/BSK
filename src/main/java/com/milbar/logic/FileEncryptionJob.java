@@ -52,7 +52,7 @@ public class FileEncryptionJob extends Task {
         String name = fileAndExtension.getFileName();
         String extension = fileAndExtension.getFileExtension();
 
-        // todo
+        // todo implement encryption of a file
         return null;
     }
 }
