@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="366.0" maxWidth="340.0" minHeight="240.0" minWidth="315.0" prefHeight="240.0" prefWidth="315.0" styleClass="main-pane" stylesheets="@../css/LoginWindow.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.milbar.gui.LoginWindowController">
+    <children>
+        <Label layoutX="94.0" layoutY="21.0" prefHeight="62.0" prefWidth="210.0" styleClass="big-label" stylesheets="@../css/LoginWindow.css" text="Zaloguj się" textAlignment="CENTER">
+            <font>
+                <Font name="Times New Roman" size="28.0" />
+            </font></Label>
+        <TextField fx:id="userNameField" layoutX="98.0" layoutY="97.0" onAction="#userNameEntered" onKeyReleased="#userNameEntered" promptText="Użytkownik" styleClass="text-field" stylesheets="@../css/LoginWindow.css" />
+        <PasswordField fx:id="passwordField" layoutX="98.0" layoutY="137.0" onAction="#loginButtonClicked" onKeyReleased="#passwordEntered" promptText="Hasło" styleClass="text-field" />
+        <Button layoutX="160.0" layoutY="183.0" mnemonicParsing="false" onAction="#loginButtonClicked" prefHeight="30.0" prefWidth="113.0" styleClass="button" stylesheets="@../css/LoginWindow.css" text="Zaloguj" />
+        <Button layoutX="67.0" layoutY="183.0" mnemonicParsing="false" onAction="#cancelButtonClicked" prefHeight="30.0" prefWidth="77.0" styleClass="button" stylesheets="@../css/LoginWindow.css" text="Anuluj" />
+        <Label fx:id="errorLabel" layoutX="82.0" layoutY="303.0" prefHeight="17.0" prefWidth="177.0" styleClass="error-label" stylesheets="@../css/LoginWindow.css" textAlignment="CENTER" textFill="#ff5300" />
+        <ImageView fitHeight="30.0" fitWidth="34.0" layoutX="67.0" layoutY="97.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@../images/login.png" />
+        </ImageView>
+        <ImageView fitHeight="30.0" fitWidth="34.0" layoutX="67.0" layoutY="137.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@../images/password.png" />
+        </ImageView>
+    </children>
+</AnchorPane>

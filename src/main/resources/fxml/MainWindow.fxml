@@ -6,25 +6,31 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.Pane?>
 
-<BorderPane maxHeight="Infinity" maxWidth="Infinity" prefHeight="599.0" prefWidth="723.0" stylesheets="@../css/MainController.css" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.milbar.gui.MainController">
+<BorderPane maxHeight="Infinity" maxWidth="Infinity" prefHeight="599.0" prefWidth="723.0" stylesheets="@../css/MainWindow.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.milbar.gui.MainWindowController">
+   <fx:define>
+      <ToggleGroup fx:id="encryptionModeToggleGroup" />
+   </fx:define>
    <top>
-      <MenuBar fx:id="menuBar" prefHeight="29.0" prefWidth="677.0" stylesheets="@../css/MainController.css" BorderPane.alignment="CENTER">
+      <MenuBar fx:id="menuBar" prefHeight="29.0" prefWidth="677.0" stylesheets="@../css/MainWindow.css" BorderPane.alignment="CENTER">
          <menus>
-            <Menu mnemonicParsing="false" text="Plik">
+            <Menu mnemonicParsing="false" text="File">
                <items>
                   <MenuItem mnemonicParsing="false" onAction="#menuBarActionCloseApplication" text="Zamknij" />
+                  <MenuItem mnemonicParsing="false" onAction="#loginMenuBarClicked" text="Login" />
+                  <MenuItem mnemonicParsing="false" onAction="#logoutMenuBarClicked" text="Logout" />
                </items>
             </Menu>
-            <Menu mnemonicParsing="false" text="Edytuj" />
-            <Menu mnemonicParsing="false" text="Ustawienia" />
-            <Menu mnemonicParsing="false" text="Pomoc">
+            <Menu mnemonicParsing="false" text="Edit" />
+            <Menu mnemonicParsing="false" text="Settings" />
+            <Menu mnemonicParsing="false" text="Help">
                <items>
                   <MenuItem mnemonicParsing="false" onAction="#showAboutMenuBarClicked" text="About" />
                </items>
@@ -52,18 +58,22 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="296.0" prefWidth="722.0">
                <children>
-                  <Pane fx:id="mainPane" prefHeight="200.0" prefWidth="200.0" stylesheets="@../css/MainController.css">
-                     <children>
-                        <Button layoutX="61.0" layoutY="67.0" mnemonicParsing="false" onAction="#encryptFilesButtonClicked" text="Encrypt files" />
-                     </children>
-                  </Pane>
-                  <Button layoutX="192.0" layoutY="64.0" mnemonicParsing="false" onAction="#chooseFilesButtonClicked" text="Choose files" />
+                  <Button layoutX="226.0" layoutY="91.0" mnemonicParsing="false" onAction="#chooseFilesButtonClicked" text="Choose files" />
                   <ProgressBar fx:id="encryptionProgressBar" layoutX="106.0" layoutY="148.0" prefWidth="200.0" progress="0.0" />
+                  <RadioButton fx:id="radioButton1" layoutX="545.0" layoutY="47.0" mnemonicParsing="false" onAction="#radioButtonSelected" selected="true" stylesheets="@../css/MainWindow.css" text="ECB">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="encryptionModeToggleGroup" />
+                     </toggleGroup></RadioButton>
+                  <RadioButton fx:id="radioButton2" layoutX="545.0" layoutY="77.0" mnemonicParsing="false" onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="CCB" toggleGroup="$encryptionModeToggleGroup" />
+                  <RadioButton fx:id="radioButton3" layoutX="545.0" layoutY="103.0" mnemonicParsing="false" onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="CFM" toggleGroup="$encryptionModeToggleGroup" />
+                  <RadioButton fx:id="radioButton4" layoutX="545.0" layoutY="131.0" mnemonicParsing="false" onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="OFM" toggleGroup="$encryptionModeToggleGroup" />
+                  <Label layoutX="545.0" layoutY="14.0" text="Block encryption mode" />
+                  <Button layoutX="106.0" layoutY="91.0" mnemonicParsing="false" onAction="#encryptFilesButtonClicked" text="Encrypt files" />
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="291.0" prefWidth="722.0">
                <children>
-                  <TableView fx:id="filesTable" layoutX="74.0" layoutY="58.0" prefHeight="316.3826191904688" prefWidth="722.0869804742889" stylesheets="@../css/MainController.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <TableView fx:id="filesTable" layoutX="74.0" layoutY="58.0" prefHeight="316.3826191904688" prefWidth="722.0869804742889" stylesheets="@../css/MainWindow.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <columns>
                         <TableColumn fx:id="imageNameColumn" prefWidth="178.0" text="Name" />
                         <TableColumn fx:id="progressColumn" prefWidth="190.0" text="Progress" />
