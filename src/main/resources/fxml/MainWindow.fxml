@@ -14,75 +14,97 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane maxHeight="Infinity" maxWidth="Infinity" prefHeight="599.0" prefWidth="723.0" stylesheets="@../css/MainWindow.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.milbar.gui.MainWindowController">
-   <fx:define>
-      <ToggleGroup fx:id="encryptionModeToggleGroup" />
-   </fx:define>
-   <top>
-      <MenuBar fx:id="menuBar" prefHeight="29.0" prefWidth="677.0" stylesheets="@../css/MainWindow.css" BorderPane.alignment="CENTER">
-         <menus>
-            <Menu mnemonicParsing="false" text="File">
-               <items>
-                  <MenuItem mnemonicParsing="false" onAction="#menuBarActionCloseApplication" text="Zamknij" />
-                  <MenuItem mnemonicParsing="false" onAction="#loginMenuBarClicked" text="Login" />
-                  <MenuItem mnemonicParsing="false" onAction="#logoutMenuBarClicked" text="Logout" />
-               </items>
-            </Menu>
-            <Menu mnemonicParsing="false" text="Edit" />
-            <Menu mnemonicParsing="false" text="Settings" />
-            <Menu mnemonicParsing="false" text="Help">
-               <items>
-                  <MenuItem mnemonicParsing="false" onAction="#showAboutMenuBarClicked" text="About" />
-               </items>
-            </Menu>
-         </menus>
-      </MenuBar>
-   </top>
-   <bottom>
-      <AnchorPane prefHeight="23.0" prefWidth="677.0" BorderPane.alignment="CENTER">
-         <children>
-            <SplitPane minHeight="-Infinity" prefHeight="23.0" prefWidth="1033.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-               <items>
-                  <AnchorPane minHeight="-Infinity" minWidth="0.0" prefHeight="23.0" prefWidth="100.0">
-                     <children>
-                        <Label fx:id="logLabel" minHeight="-Infinity" prefHeight="21.0" prefWidth="877.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                     </children>
-                  </AnchorPane>
-               </items>
-            </SplitPane>
-         </children>
-      </AnchorPane>
-   </bottom>
-   <center>
-      <SplitPane dividerPositions="0.41484435969215333" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" BorderPane.alignment="CENTER">
-        <items>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="296.0" prefWidth="722.0">
-               <children>
-                  <Button layoutX="226.0" layoutY="91.0" mnemonicParsing="false" onAction="#chooseFilesButtonClicked" text="Choose files" />
-                  <ProgressBar fx:id="encryptionProgressBar" layoutX="106.0" layoutY="148.0" prefWidth="200.0" progress="0.0" />
-                  <RadioButton fx:id="radioButton1" layoutX="545.0" layoutY="47.0" mnemonicParsing="false" onAction="#radioButtonSelected" selected="true" stylesheets="@../css/MainWindow.css" text="ECB">
-                     <toggleGroup>
-                        <ToggleGroup fx:id="encryptionModeToggleGroup" />
-                     </toggleGroup></RadioButton>
-                  <RadioButton fx:id="radioButton2" layoutX="545.0" layoutY="77.0" mnemonicParsing="false" onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="CCB" toggleGroup="$encryptionModeToggleGroup" />
-                  <RadioButton fx:id="radioButton3" layoutX="545.0" layoutY="103.0" mnemonicParsing="false" onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="CFM" toggleGroup="$encryptionModeToggleGroup" />
-                  <RadioButton fx:id="radioButton4" layoutX="545.0" layoutY="131.0" mnemonicParsing="false" onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="OFM" toggleGroup="$encryptionModeToggleGroup" />
-                  <Label layoutX="545.0" layoutY="14.0" text="Block encryption mode" />
-                  <Button layoutX="106.0" layoutY="91.0" mnemonicParsing="false" onAction="#encryptFilesButtonClicked" text="Encrypt files" />
-               </children>
-            </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="291.0" prefWidth="722.0">
-               <children>
-                  <TableView fx:id="filesTable" layoutX="74.0" layoutY="58.0" prefHeight="316.3826191904688" prefWidth="722.0869804742889" stylesheets="@../css/MainWindow.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <columns>
-                        <TableColumn fx:id="imageNameColumn" prefWidth="178.0" text="Name" />
-                        <TableColumn fx:id="progressColumn" prefWidth="190.0" text="Progress" />
-                        <TableColumn fx:id="statusColumn" minWidth="0.0" prefWidth="176.0" text="Status" />
-                     </columns>
-                  </TableView>
-               </children>
-            </AnchorPane>
-        </items>
-      </SplitPane>
-   </center>
+<BorderPane maxHeight="Infinity" maxWidth="Infinity" prefHeight="599.0" prefWidth="723.0"
+            stylesheets="@../css/MainWindow.css" xmlns="http://javafx.com/javafx/8.0.121"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.milbar.gui.MainWindowController">
+    <fx:define>
+        <ToggleGroup fx:id="encryptionModeToggleGroup"/>
+    </fx:define>
+    <top>
+        <MenuBar fx:id="menuBar" prefHeight="29.0" prefWidth="677.0" stylesheets="@../css/MainWindow.css"
+                 BorderPane.alignment="CENTER">
+            <menus>
+                <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#menuBarActionCloseApplication" text="Zamknij"/>
+                        <MenuItem mnemonicParsing="false" onAction="#loginMenuBarClicked" text="Login"/>
+                        <MenuItem mnemonicParsing="false" onAction="#logoutMenuBarClicked" text="Logout"/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit"/>
+                <Menu mnemonicParsing="false" text="Settings"/>
+                <Menu mnemonicParsing="false" text="Help">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#showAboutMenuBarClicked" text="About"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+    <bottom>
+        <AnchorPane prefHeight="23.0" prefWidth="677.0" BorderPane.alignment="CENTER">
+            <children>
+                <SplitPane minHeight="-Infinity" prefHeight="23.0" prefWidth="1033.0" AnchorPane.bottomAnchor="0.0"
+                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <items>
+                        <AnchorPane minHeight="-Infinity" minWidth="0.0" prefHeight="23.0" prefWidth="100.0">
+                            <children>
+                                <Label fx:id="logLabel" minHeight="-Infinity" prefHeight="21.0" prefWidth="877.0"
+                                       AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                            </children>
+                        </AnchorPane>
+                    </items>
+                </SplitPane>
+            </children>
+        </AnchorPane>
+    </bottom>
+    <center>
+        <SplitPane dividerPositions="0.41484435969215333" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0"
+                   BorderPane.alignment="CENTER">
+            <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="296.0" prefWidth="722.0">
+                    <children>
+                        <Button layoutX="226.0" layoutY="91.0" mnemonicParsing="false"
+                                onAction="#chooseFilesButtonClicked" text="Choose files"/>
+                        <ProgressBar fx:id="encryptionProgressBar" layoutX="106.0" layoutY="148.0" prefWidth="200.0"
+                                     progress="0.0"/>
+                        <RadioButton fx:id="radioButton1" layoutX="545.0" layoutY="47.0" mnemonicParsing="false"
+                                     onAction="#radioButtonSelected" selected="true"
+                                     stylesheets="@../css/MainWindow.css" text="ECB">
+                            <toggleGroup>
+                                <ToggleGroup fx:id="encryptionModeToggleGroup"/>
+                            </toggleGroup>
+                        </RadioButton>
+                        <RadioButton fx:id="radioButton2" layoutX="545.0" layoutY="77.0" mnemonicParsing="false"
+                                     onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="CBC"
+                                     toggleGroup="$encryptionModeToggleGroup"/>
+                        <RadioButton fx:id="radioButton3" layoutX="545.0" layoutY="103.0" mnemonicParsing="false"
+                                     onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="CFB"
+                                     toggleGroup="$encryptionModeToggleGroup"/>
+                        <RadioButton fx:id="radioButton4" layoutX="545.0" layoutY="131.0" mnemonicParsing="false"
+                                     onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="OFB"
+                                     toggleGroup="$encryptionModeToggleGroup"/>
+                        <Label layoutX="545.0" layoutY="14.0" text="Block encryption mode"/>
+                        <Button layoutX="106.0" layoutY="91.0" mnemonicParsing="false"
+                                onAction="#encryptFilesButtonClicked" text="Encrypt files"/>
+                    </children>
+                </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="291.0" prefWidth="722.0">
+                    <children>
+                        <TableView fx:id="filesTable" layoutX="74.0" layoutY="58.0" prefHeight="316.3826191904688"
+                                   prefWidth="722.0869804742889" stylesheets="@../css/MainWindow.css"
+                                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <columns>
+                                <TableColumn fx:id="imageNameColumn" prefWidth="178.0" text="Name"/>
+                                <TableColumn fx:id="progressColumn" prefWidth="190.0" text="Progress"/>
+                                <TableColumn fx:id="statusColumn" minWidth="0.0" prefWidth="176.0" text="Status"/>
+                            </columns>
+                        </TableView>
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+    </center>
 </BorderPane>
