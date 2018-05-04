@@ -1,11 +1,13 @@
 package com.milbar.gui;
 
-import com.milbar.logic.FileEncryptionJob;
-import com.milbar.logic.login.UserCredentials;
-import com.milbar.logic.encryption.type.BlockEncryptionTypes;
+import com.milbar.logic.FileCipherJob;
+import com.milbar.logic.encryption.Algorithm;
+import com.milbar.logic.encryption.Mode;
 import com.milbar.logic.exceptions.IllegalEventSourceException;
 import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
+import com.milbar.logic.login.UserCredentials;
 import com.stasbar.Logger;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,8 +25,13 @@ import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,14 +39,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainWindowController implements JavaFXWindowsListener {
-    
+
     private final static int THREADS_POOL_SIZE = 4;
-    private final static BlockEncryptionTypes DEFAULT_BLOCK_ENCRYPTION_TYPE = BlockEncryptionTypes.ElectronicCodebook;
+    private final static Mode DEFAULT_BLOCK_ENCRYPTION_MODE = Mode.ECB;
+    private final static Algorithm DEFAULT_ENCRYPTION_ALGORITHM = Algorithm.DES;
     private final static String DEFAULT_RADIO_BUTTON_NAME = "radioButton";
-    
+
     private ExecutorService executor = Executors.newFixedThreadPool(THREADS_POOL_SIZE);
-    private ObservableList<FileEncryptionJob> tableElementsList = FXCollections.observableArrayList();
-    private BlockEncryptionTypes selectedBlockEncryptionType = DEFAULT_BLOCK_ENCRYPTION_TYPE;
+    private ObservableList<FileCipherJob> tableElementsList = FXCollections.observableArrayList();
+    private Mode selectedBlockEncryptionMode = DEFAULT_BLOCK_ENCRYPTION_MODE;
+    private Algorithm selectedEncryptionAlgorithm = DEFAULT_ENCRYPTION_ALGORITHM;
     private List<File> files;
     private boolean filesSelected = false;
     private int filesSelectedAmount = -1;
@@ -47,38 +56,51 @@ public class MainWindowController implements JavaFXWindowsListener {
     private Set<String> openedWindows = new HashSet<>();
     private LoginWindow loginWindow;
     private UserCredentials userCredentials;
-    
+    private final SimpleObjectProperty<SecretKey> privateKeyObservable = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<byte[]> initialVectorObservable = new SimpleObjectProperty<>();
+
     @FXML
-    TableColumn<FileEncryptionJob, String> imageNameColumn;
+    TableColumn<FileCipherJob, String> imageNameColumn;
     @FXML
-    TableColumn<FileEncryptionJob, Double> progressColumn;
+    TableColumn<FileCipherJob, Double> progressColumn;
     @FXML
-    TableColumn<FileEncryptionJob, String> statusColumn;
+    TableColumn<FileCipherJob, String> statusColumn;
     @FXML
-    TableView<FileEncryptionJob> filesTable;
-    
+    TableView<FileCipherJob> filesTable;
+
     @FXML
     Pane mainPane;
     @FXML
     Label logLabel;
-
-    
     @FXML
-    private void initialize() {
+    Label labelInitialVector;
+    @FXML
+    Label labelPrivateKey;
+
+
+    @FXML
+    private void initialize() throws NoSuchAlgorithmException {
         initializeFileChooser();
         refreshTable();
+        privateKeyObservable.addListener((observable, oldValue, newValue) ->
+                labelPrivateKey.setText(DatatypeConverter.printHexBinary(newValue.getEncoded())));
+        refreshPrivateKey();
+
+        initialVectorObservable.addListener((observable, oldValue, newValue) ->
+                labelInitialVector.setText(DatatypeConverter.printHexBinary(newValue)));
+        refreshInitialVector();
     }
-    
+
     private void initializeFileChooser() {
         fileChooser.setTitle("Select files to encrypt.");
         //fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JPG images", "*.jpg"));
     }
-    
+
     @FXML
     void menuBarActionCloseApplication() {
-    
+
     }
-    
+
     @FXML
     void chooseFilesButtonClicked() {
         files = fileChooser.showOpenMultipleDialog(null);
@@ -86,48 +108,74 @@ public class MainWindowController implements JavaFXWindowsListener {
             filesSelected = false;
             return;
         }
-        
+
         filesSelectedAmount = files.size();
         filesSelected = filesSelectedAmount > 0;
         writeToLogLabel("Selected " + filesSelectedAmount + " files for encryption.");
-        createFileEncryptionJobsList();
+        createFileJobsList(FileCipherJob.CipherMode.ENCRYPT);
     }
-    
+
     @FXML
     void encryptFilesButtonClicked() {
-        createFileEncryptionJobsList();
-        
+        createFileJobsList(FileCipherJob.CipherMode.ENCRYPT);
+
         if (filesSelected) {
             writeToLogLabel("Starting encryption of " + filesSelectedAmount + " files.");
             tableElementsList.forEach(task -> executor.submit(task));
-            
+
         }
     }
-    
-    private void createFileEncryptionJobsList() {
+
+    @FXML
+    void decryptFilesButtonClicked() {
+        createFileJobsList(FileCipherJob.CipherMode.DECRYPT);
+
+        if (filesSelected) {
+            writeToLogLabel("Starting decryption of " + filesSelectedAmount + " files.");
+            tableElementsList.forEach(task -> executor.submit(task));
+
+        }
+    }
+
+    @FXML
+    void refreshPrivateKey() throws NoSuchAlgorithmException {
+        privateKeyObservable.setValue(KeyGenerator.getInstance(selectedEncryptionAlgorithm.name()).generateKey());
+    }
+
+    @FXML
+    void refreshInitialVector() {
+        if (selectedBlockEncryptionMode.initVectorRequired)
+            initialVectorObservable.setValue(SecureRandom.getSeed(selectedEncryptionAlgorithm.initVectorSize));
+        else
+            initialVectorObservable.setValue("".getBytes());
+    }
+
+    private void createFileJobsList(FileCipherJob.CipherMode mode) {
         if (filesSelected) {
             tableElementsList.clear();
-            files.forEach(file -> tableElementsList.add(new FileEncryptionJob(file)));
+            files.forEach(file -> tableElementsList.add(
+                    new FileCipherJob(file, mode, selectedEncryptionAlgorithm,
+                            selectedBlockEncryptionMode, privateKeyObservable.get(), initialVectorObservable.get())));
         }
         refreshTable();
     }
-    
+
     private void refreshTable() {
         imageNameColumn.setCellValueFactory( //nazwa pliku
                 p -> new SimpleStringProperty(p.getValue().getFile().getName()));
-        
+
         statusColumn.setCellValueFactory( //status przetwarzania
                 p -> p.getValue().getStatusProperty());
-        
+
         progressColumn.setCellFactory( //wykorzystanie paska postępu
                 ProgressBarTableCell.forTableColumn());
-        
+
         progressColumn.setCellValueFactory( //postęp przetwarzania
                 p -> p.getValue().getProgressProperty().asObject());
-        
+
         filesTable.setItems(tableElementsList);
     }
-    
+
     @FXML
     public void loginMenuBarClicked() {
         if (openedWindows.add(LoginWindow.class.getSimpleName())) {
@@ -137,58 +185,89 @@ public class MainWindowController implements JavaFXWindowsListener {
                 e.printStackTrace();
                 writeToLogLabel("Failed to open login window.");
             }
-        }
-        else {
+        } else {
             writeToLogLabel("Login window is already opened!");
         }
     }
-    
+
     @FXML
     public void logoutMenuBarClicked() {
         logoutCurrentUser();
     }
-    
+
     private void logoutCurrentUser() {
         userCredentials.destroy();
         userCredentials = null;
         writeToLogLabel("Successfully logged out.");
     }
-    
+
     @FXML
     public void showAboutMenuBarClicked() {
         openNewWindow("fxml/AboutWindow.fxml", "About");
     }
-    
+
     @FXML
     public void radioButtonSelected(ActionEvent event) throws IllegalEventSourceException {
-        RadioButton rb = (RadioButton)event.getSource();
-        
+        RadioButton rb = (RadioButton) event.getSource();
+
         switch (getRadioButtonNumber(rb)) {
-            case "1": selectedBlockEncryptionType = BlockEncryptionTypes.ElectronicCodebook; break;
-            case "2": selectedBlockEncryptionType = BlockEncryptionTypes.CipherBlockChaining; break;
-            case "3": selectedBlockEncryptionType = BlockEncryptionTypes.CipherFeedbackMode; break;
-            case "4": selectedBlockEncryptionType = BlockEncryptionTypes.OutputFeedbackMode; break;
-            default: throw new IllegalEventSourceException(rb.getId());
+            case "1":
+                selectedBlockEncryptionMode = Mode.ECB;
+                break;
+            case "2":
+                selectedBlockEncryptionMode = Mode.CBC;
+                break;
+            case "3":
+                selectedBlockEncryptionMode = Mode.CFB;
+                break;
+            case "4":
+                selectedBlockEncryptionMode = Mode.OFB;
+                break;
+            default:
+                throw new IllegalEventSourceException(rb.getId());
         }
+        refreshInitialVector();
     }
-    
+
+    @FXML
+    public void algorithmSelected(ActionEvent event) throws IllegalEventSourceException, NoSuchAlgorithmException {
+        RadioButton rb = (RadioButton) event.getSource();
+
+        switch (rb.getId()) {
+            case "radioButtonAes":
+                selectedEncryptionAlgorithm = Algorithm.AES;
+                break;
+            case "radioButtonDes":
+                selectedEncryptionAlgorithm = Algorithm.DES;
+                break;
+            case "radioButtonBlowfish":
+                selectedEncryptionAlgorithm = Algorithm.Blowfish;
+                break;
+            default:
+                throw new IllegalEventSourceException(rb.getId());
+        }
+        refreshPrivateKey();
+        refreshInitialVector();
+        privateKeyObservable.setValue(KeyGenerator.getInstance(selectedEncryptionAlgorithm.name()).generateKey());
+    }
+
     @Override
     public void windowClosed(String callerClassName) {
         if (!openedWindows.remove(callerClassName))
             throw new UnexpectedWindowEventCall("Class name: " + callerClassName);
     }
-    
+
     private void writeToLogLabel(String log) {
         this.logLabel.setText(log);
         Logger.info(log);
     }
-    
+
     private String getRadioButtonNumber(RadioButton radioButton) {
         String radioButtonId = radioButton.getId();
         String radioButtonNameAndNumber[] = radioButtonId.split(DEFAULT_RADIO_BUTTON_NAME);
         return radioButtonNameAndNumber.length > 1 ? radioButtonNameAndNumber[1] : "-1";
     }
-    
+
     private void openNewWindow(String fxmlPath, String windowTitle) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource(fxmlPath));
@@ -201,7 +280,7 @@ public class MainWindowController implements JavaFXWindowsListener {
             e.printStackTrace();
         }
     }
-    
+
     void loginUser(UserCredentials userCredentials) {
         this.userCredentials = userCredentials;
         writeToLogLabel("Logged in as user: " + userCredentials.getUsername());

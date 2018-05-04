@@ -1,5 +1,10 @@
-import junit.framework.Assert.assertEquals
+import com.milbar.logic.FileCipherJob
+import com.milbar.logic.encryption.Algorithm
+import com.milbar.logic.encryption.Mode
+import org.junit.Assert.assertEquals
+
 import org.junit.Test
+import java.io.File
 import java.security.SecureRandom
 import java.util.*
 import javax.crypto.Cipher
@@ -10,26 +15,19 @@ import javax.xml.bind.DatatypeConverter
 
 
 class CipherTest {
-    enum class Algorithm(val ivLength: Int) {
-        AES(16), DES(8), Blowfish(8)
-    }
-
-    enum class Mode {
-        ECB, CBC, CFB, OFB
-    }
 
 
     private val data = "Kotlin is the best lang ever !!!".toByteArray()
-    // In no padding algo it must be multiple of 8(DES) or 16(AES)
+    // In no padding alg it must be multiple of 8(DES) or 16(AES)
 
     @Test
     fun testXorCipherWithNumber() {
         val data = 0b10110101010000111011010101000011
         val key = 0b10101010101010101010101010101010
 
-        val encodedData = data xor key;
+        val encodedData = data xor key
 
-        val decodedData = encodedData xor key;
+        val decodedData = encodedData xor key
 
         assertEquals(data, decodedData)
     }
@@ -104,6 +102,7 @@ class CipherTest {
         val encrypted2 = testCohesion(Algorithm.DES, Mode.CBC, true, initVector, key)
         assert(Arrays.equals(encrypted1, encrypted2))
     }
+
     /**
      * Blowfish
      */
@@ -167,6 +166,7 @@ class CipherTest {
         val encrypted2 = testCohesion(Algorithm.Blowfish, Mode.CBC, true, initVector, key)
         assert(Arrays.equals(encrypted1, encrypted2))
     }
+
     /**
      * AES
      */
@@ -231,11 +231,29 @@ class CipherTest {
         assert(Arrays.equals(encrypted1, encrypted2))
     }
 
+    @Test
+    fun testEncryptFile() {
+        val secretKey = KeyGenerator.getInstance(Algorithm.AES.name).generateKey()
+        val encryptTask = FileCipherJob(File("/Users/admin1/Downloads/manning-publications-gradle-in-action.pdf"),
+                FileCipherJob.CipherMode.DECRYPT,
+                Algorithm.AES,
+                Mode.ECB,
+                secretKey,
+                "".toByteArray())
+
+        encryptTask.call()
+        val decryptTask = FileCipherJob(File("/Users/admin1/Downloads/encrypted_manning-publications-gradle-in-action.pdf"),
+                FileCipherJob.CipherMode.DECRYPT,
+                Algorithm.AES,
+                Mode.ECB, secretKey, "".toByteArray())
+        decryptTask.call()
+    }
+
 
     private fun testCohesion(algorithm: Algorithm,
                              mode: Mode,
                              isPadding: Boolean,
-                             initVectorBytes: ByteArray = SecureRandom.getInstanceStrong().generateSeed(algorithm.ivLength),
+                             initVectorBytes: ByteArray = SecureRandom.getInstanceStrong().generateSeed(algorithm.initVectorSize),
                              secretKey: SecretKey = KeyGenerator.getInstance(algorithm.name).generateKey()): ByteArray {
 
         val cipher = Cipher.getInstance("${algorithm.name}/${mode.name}/${if (isPadding) "PKCS5Padding" else "NoPadding"}")
@@ -250,7 +268,7 @@ class CipherTest {
             cipher.init(Cipher.ENCRYPT_MODE, secretKey, initVector)
 
         val encrypted = cipher.doFinal(data)
-        println("Encrypted: ${String(encrypted)}");
+        println("Encrypted: ${String(encrypted)}")
 
         if (mode == Mode.ECB)
             cipher.init(Cipher.DECRYPT_MODE, secretKey)

@@ -1,25 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.RadioButton?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javax.swing.*?>
 <BorderPane maxHeight="Infinity" maxWidth="Infinity" prefHeight="599.0" prefWidth="723.0"
             stylesheets="@../css/MainWindow.css" xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.milbar.gui.MainWindowController">
-    <fx:define>
-        <ToggleGroup fx:id="encryptionModeToggleGroup"/>
-    </fx:define>
+
     <top>
         <MenuBar fx:id="menuBar" prefHeight="29.0" prefWidth="677.0" stylesheets="@../css/MainWindow.css"
                  BorderPane.alignment="CENTER">
@@ -65,29 +52,68 @@
             <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="296.0" prefWidth="722.0">
                     <children>
-                        <Button layoutX="226.0" layoutY="91.0" mnemonicParsing="false"
-                                onAction="#chooseFilesButtonClicked" text="Choose files"/>
-                        <ProgressBar fx:id="encryptionProgressBar" layoutX="106.0" layoutY="148.0" prefWidth="200.0"
-                                     progress="0.0"/>
-                        <RadioButton fx:id="radioButton1" layoutX="545.0" layoutY="47.0" mnemonicParsing="false"
-                                     onAction="#radioButtonSelected" selected="true"
-                                     stylesheets="@../css/MainWindow.css" text="ECB">
-                            <toggleGroup>
-                                <ToggleGroup fx:id="encryptionModeToggleGroup"/>
-                            </toggleGroup>
-                        </RadioButton>
-                        <RadioButton fx:id="radioButton2" layoutX="545.0" layoutY="77.0" mnemonicParsing="false"
-                                     onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="CBC"
-                                     toggleGroup="$encryptionModeToggleGroup"/>
-                        <RadioButton fx:id="radioButton3" layoutX="545.0" layoutY="103.0" mnemonicParsing="false"
-                                     onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="CFB"
-                                     toggleGroup="$encryptionModeToggleGroup"/>
-                        <RadioButton fx:id="radioButton4" layoutX="545.0" layoutY="131.0" mnemonicParsing="false"
-                                     onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="OFB"
-                                     toggleGroup="$encryptionModeToggleGroup"/>
-                        <Label layoutX="545.0" layoutY="14.0" text="Block encryption mode"/>
-                        <Button layoutX="106.0" layoutY="91.0" mnemonicParsing="false"
-                                onAction="#encryptFilesButtonClicked" text="Encrypt files"/>
+                        <VBox layoutX="100.0" layoutY="91.0" alignment="CENTER" spacing="10">
+                            <Button mnemonicParsing="false"
+                                    onAction="#chooseFilesButtonClicked" text="Choose files"/>
+                            <HBox spacing="10">
+                                <Button mnemonicParsing="false"
+                                        onAction="#encryptFilesButtonClicked" text="Encrypt files"/>
+                                <Button mnemonicParsing="false"
+                                        onAction="#decryptFilesButtonClicked" text="Decrypt files"/>
+                            </HBox>
+
+                            <ProgressBar fx:id="encryptionProgressBar" minWidth="200" />
+                        </VBox>
+                        <VBox layoutX="545.0" layoutY="12.0" spacing="10">
+                            <Label text="Block encryption mode"/>
+                            <RadioButton fx:id="radioButton1" mnemonicParsing="false" onAction="#radioButtonSelected"
+                                         selected="true" stylesheets="@../css/MainWindow.css" text="ECB">
+                                <toggleGroup>
+                                    <ToggleGroup fx:id="encryptionModeToggleGroup"/>
+                                </toggleGroup>
+                            </RadioButton>
+
+                            <RadioButton fx:id="radioButton2" mnemonicParsing="false" onAction="#radioButtonSelected"
+                                         stylesheets="@../css/MainWindow.css" text="CBC"
+                                         toggleGroup="$encryptionModeToggleGroup"/>
+
+                            <RadioButton fx:id="radioButton3" mnemonicParsing="false" onAction="#radioButtonSelected"
+                                         stylesheets="@../css/MainWindow.css" text="CFB"
+                                         toggleGroup="$encryptionModeToggleGroup"/>
+
+                            <RadioButton fx:id="radioButton4" mnemonicParsing="false" onAction="#radioButtonSelected"
+                                         stylesheets="@../css/MainWindow.css" text="OFB"
+                                         toggleGroup="$encryptionModeToggleGroup"/>
+                        </VBox>
+
+
+                        <VBox layoutX="445.0" layoutY="12.0" spacing="10">
+                            <Label text="Algorithm"/>
+                            <RadioButton fx:id="radioButtonAes" mnemonicParsing="false" onAction="#algorithmSelected"
+                                         selected="true" text="AES" toggleGroup="$algorithmToggleGroup">
+                                <toggleGroup>
+                                    <ToggleGroup fx:id="algorithmToggleGroup"/>
+                                </toggleGroup>
+                            </RadioButton>
+                            <RadioButton fx:id="radioButtonDes" mnemonicParsing="false" onAction="#algorithmSelected"
+                                         text="DES" toggleGroup="$algorithmToggleGroup"/>
+
+                            <RadioButton fx:id="radioButtonBlowfish" mnemonicParsing="false"
+                                         onAction="#algorithmSelected" text="Blowfish"
+                                         toggleGroup="$algorithmToggleGroup"/>
+                        </VBox>
+                        <VBox layoutX="445.0" layoutY="168.0" spacing="10">
+                            <HBox spacing="10">
+                                <Label text="Initial Vector"/>
+                                <Label fx:id="labelInitialVector"/>
+                            </HBox>
+                            <HBox spacing="10">
+                                <Label text="Private Key"/>
+                                <Label fx:id="labelPrivateKey"/>
+                            </HBox>
+                        </VBox>
+
+
                     </children>
                 </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="291.0" prefWidth="722.0">

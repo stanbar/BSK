@@ -4,8 +4,6 @@ import com.milbar.logic.exceptions.IllegalFileExtensionException;
 import com.milbar.logic.exceptions.IllegalFileNameException;
 
 import java.io.File;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class FileAndExtension {
 
@@ -14,8 +12,9 @@ public class FileAndExtension {
     private File file;
     private String fileName, fileExtension;
 
-    public FileAndExtension(File file) {
+    public FileAndExtension(File file) throws IllegalFileNameException {
         this.file = file;
+        readFileNameAndExtension();
     }
 
     public void readFileNameAndExtension() throws IllegalFileNameException {
@@ -41,6 +40,10 @@ public class FileAndExtension {
             this.fileExtension = NO_FILE_EXTENSION;
             this.fileName = fileName;
         }
+    }
+
+    public File getFile() {
+        return file;
     }
 
     public String getFileName() {
