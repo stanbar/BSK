@@ -17,23 +17,26 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="Infinity" maxWidth="Infinity" prefHeight="620.0" prefWidth="720.0" stylesheets="@../css/MainWindow.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.milbar.gui.MainWindowController">
+<BorderPane maxHeight="Infinity" maxWidth="Infinity" prefHeight="620.0" prefWidth="720.0"
+            stylesheets="@../css/MainWindow.css" xmlns="http://javafx.com/javafx/8.0.121"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.milbar.gui.MainWindowController">
 
     <top>
-        <MenuBar fx:id="menuBar" prefHeight="29.0" prefWidth="677.0" stylesheets="@../css/MainWindow.css" BorderPane.alignment="CENTER">
+        <MenuBar fx:id="menuBar" prefHeight="29.0" prefWidth="677.0" stylesheets="@../css/MainWindow.css"
+                 BorderPane.alignment="CENTER">
             <menus>
                 <Menu mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#menuBarActionCloseApplication" text="Zamknij" />
-                        <MenuItem mnemonicParsing="false" onAction="#loginMenuBarClicked" text="Login" />
-                        <MenuItem mnemonicParsing="false" onAction="#logoutMenuBarClicked" text="Logout" />
+                        <MenuItem mnemonicParsing="false" onAction="#menuBarActionCloseApplication" text="Zamknij"/>
+                        <MenuItem mnemonicParsing="false" onAction="#loginMenuBarClicked" text="Login"/>
+                        <MenuItem mnemonicParsing="false" onAction="#logoutMenuBarClicked" text="Logout"/>
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Edit" />
-                <Menu mnemonicParsing="false" text="Settings" />
+                <Menu mnemonicParsing="false" text="Edit"/>
+                <Menu mnemonicParsing="false" text="Settings"/>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#showAboutMenuBarClicked" text="About" />
+                        <MenuItem mnemonicParsing="false" onAction="#showAboutMenuBarClicked" text="About"/>
                     </items>
                 </Menu>
             </menus>
@@ -42,11 +45,14 @@
     <bottom>
         <AnchorPane prefHeight="23.0" prefWidth="677.0" BorderPane.alignment="CENTER">
             <children>
-                <SplitPane minHeight="-Infinity" prefHeight="23.0" prefWidth="1033.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <SplitPane minHeight="-Infinity" prefHeight="23.0" prefWidth="1033.0" AnchorPane.bottomAnchor="0.0"
+                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
                         <AnchorPane minHeight="-Infinity" minWidth="0.0" prefHeight="23.0" prefWidth="100.0">
                             <children>
-                                <Label fx:id="logLabel" minHeight="-Infinity" prefHeight="21.0" prefWidth="877.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                <Label fx:id="logLabel" minHeight="-Infinity" prefHeight="21.0" prefWidth="877.0"
+                                       AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
                             </children>
                         </AnchorPane>
                     </items>
@@ -55,64 +61,84 @@
         </AnchorPane>
     </bottom>
     <center>
-        <SplitPane dividerPositions="0.41484435969215333" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" BorderPane.alignment="CENTER">
+        <SplitPane dividerPositions="0.41484435969215333" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0"
+                   BorderPane.alignment="CENTER">
             <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="296.0" prefWidth="722.0">
                     <children>
                         <VBox alignment="CENTER" layoutX="100.0" layoutY="91.0" spacing="10">
-                            <Button mnemonicParsing="false" onAction="#chooseFilesButtonClicked" text="Choose files" />
+                            <Button mnemonicParsing="false" onAction="#chooseFilesButtonClicked" text="Choose files"/>
 
                             <HBox spacing="10">
-                                <Button mnemonicParsing="false" onAction="#encryptFilesButtonClicked" text="Encrypt files" />
-                                <Button mnemonicParsing="false" onAction="#decryptFilesButtonClicked" text="Decrypt files" />
+                                <Button mnemonicParsing="false" onAction="#encryptFilesButtonClicked"
+                                        text="Encrypt files"/>
+                                <Button mnemonicParsing="false" onAction="#decryptFilesButtonClicked"
+                                        text="Decrypt files"/>
                             </HBox>
 
-                            <ProgressBar fx:id="encryptionProgressBar" minWidth="200" />
+                            <ProgressBar fx:id="encryptionProgressBar" minWidth="200"/>
                         </VBox>
                         <VBox layoutX="345.0" layoutY="12.0" spacing="5">
                             <HBox spacing="10">
-                                <Button mnemonicParsing="false" onAction="#loadCipherConfig" text="Load config" />
-                                <Button mnemonicParsing="false" onAction="#saveCipherConfig" text="Save config" />
+                                <Button mnemonicParsing="false" onAction="#loadCipherConfig" text="Load config"/>
+                                <Button mnemonicParsing="false" onAction="#saveCipherConfig" text="Save config"/>
                             </HBox>
                             <HBox alignment="BASELINE_LEFT" spacing="10">
                                 <VBox layoutX="445.0" layoutY="12.0" spacing="10">
-                                    <Label text="Algorithm" />
-                                    <RadioButton fx:id="radioButtonAES" mnemonicParsing="false" onAction="#algorithmSelected" selected="true" text="AES" toggleGroup="$algorithmToggleGroup">
+                                    <Label text="Algorithm"/>
+                                    <RadioButton fx:id="radioButtonAES" mnemonicParsing="false"
+                                                 onAction="#algorithmSelected" selected="true" text="AES"
+                                                 toggleGroup="$algorithmToggleGroup">
                                         <toggleGroup>
-                                            <ToggleGroup fx:id="algorithmToggleGroup" />
+                                            <ToggleGroup fx:id="algorithmToggleGroup"/>
                                         </toggleGroup>
                                     </RadioButton>
-                                    <RadioButton fx:id="radioButtonDES" mnemonicParsing="false" onAction="#algorithmSelected" text="DES" toggleGroup="$algorithmToggleGroup" />
+                                    <RadioButton fx:id="radioButtonDES" mnemonicParsing="false"
+                                                 onAction="#algorithmSelected" text="DES"
+                                                 toggleGroup="$algorithmToggleGroup"/>
 
-                                    <RadioButton fx:id="radioButtonBlowfish" mnemonicParsing="false" onAction="#algorithmSelected" text="Blowfish" toggleGroup="$algorithmToggleGroup" />
+                                    <RadioButton fx:id="radioButtonBlowfish" mnemonicParsing="false"
+                                                 onAction="#algorithmSelected" text="Blowfish"
+                                                 toggleGroup="$algorithmToggleGroup"/>
+                                    <RadioButton fx:id="radioButtonRSA" mnemonicParsing="false"
+                                                 onAction="#algorithmSelected" text="RSA"
+                                                 toggleGroup="$algorithmToggleGroup"/>
                                 </VBox>
                                 <VBox layoutX="545.0" layoutY="12.0" spacing="10">
-                                    <Label text="Block encryption mode" />
-                                    <RadioButton fx:id="radioButtonECB" mnemonicParsing="false" onAction="#radioButtonSelected" selected="true" stylesheets="@../css/MainWindow.css" text="ECB">
+                                    <Label text="Block encryption mode"/>
+                                    <RadioButton fx:id="radioButtonECB" mnemonicParsing="false"
+                                                 onAction="#radioButtonSelected" selected="true"
+                                                 stylesheets="@../css/MainWindow.css" text="ECB">
                                         <toggleGroup>
-                                            <ToggleGroup fx:id="modeToggleGroup" />
+                                            <ToggleGroup fx:id="modeToggleGroup"/>
                                         </toggleGroup>
                                     </RadioButton>
 
-                                    <RadioButton fx:id="radioButtonCBC" mnemonicParsing="false" onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="CBC" toggleGroup="$modeToggleGroup" />
+                                    <RadioButton fx:id="radioButtonCBC" mnemonicParsing="false"
+                                                 onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css"
+                                                 text="CBC" toggleGroup="$modeToggleGroup"/>
 
-                                    <RadioButton fx:id="radioButtonCFB" mnemonicParsing="false" onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="CFB" toggleGroup="$modeToggleGroup" />
+                                    <RadioButton fx:id="radioButtonCFB" mnemonicParsing="false"
+                                                 onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css"
+                                                 text="CFB" toggleGroup="$modeToggleGroup"/>
 
-                                    <RadioButton fx:id="radioButtonOFB" mnemonicParsing="false" onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css" text="OFB" toggleGroup="$modeToggleGroup" />
+                                    <RadioButton fx:id="radioButtonOFB" mnemonicParsing="false"
+                                                 onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css"
+                                                 text="OFB" toggleGroup="$modeToggleGroup"/>
                                 </VBox>
 
                             </HBox>
                             <VBox layoutX="445.0" layoutY="168.0" spacing="10">
                                 <HBox spacing="10">
-                                    <Label text="Initial Vector" />
-                                    <Label fx:id="labelInitialVector" wrapText="true" />
+                                    <Label text="Initial Vector"/>
+                                    <Label fx:id="labelInitialVector" wrapText="true"/>
                                     <VBox.margin>
-                                        <Insets top="5.0" />
+                                        <Insets top="5.0"/>
                                     </VBox.margin>
                                 </HBox>
                                 <HBox spacing="10">
-                                    <Label text="Private Key" />
-                                    <Label fx:id="labelPrivateKey" wrapText="true" />
+                                    <Label text="Private Key"/>
+                                    <Label fx:id="labelPrivateKey" wrapText="true"/>
                                 </HBox>
                             </VBox>
                         </VBox>
@@ -120,11 +146,14 @@
                 </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="291.0" prefWidth="722.0">
                     <children>
-                        <TableView fx:id="filesTable" layoutX="74.0" layoutY="58.0" prefHeight="316.3826191904688" prefWidth="722.0869804742889" stylesheets="@../css/MainWindow.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TableView fx:id="filesTable" layoutX="74.0" layoutY="58.0" prefHeight="316.3826191904688"
+                                   prefWidth="722.0869804742889" stylesheets="@../css/MainWindow.css"
+                                   AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <columns>
-                                <TableColumn fx:id="imageNameColumn" prefWidth="178.0" text="Name" />
-                                <TableColumn fx:id="progressColumn" prefWidth="190.0" text="Progress" />
-                                <TableColumn fx:id="statusColumn" minWidth="0.0" prefWidth="176.0" text="Status" />
+                                <TableColumn fx:id="imageNameColumn" prefWidth="178.0" text="Name"/>
+                                <TableColumn fx:id="progressColumn" prefWidth="190.0" text="Progress"/>
+                                <TableColumn fx:id="statusColumn" minWidth="0.0" prefWidth="176.0" text="Status"/>
                             </columns>
                         </TableView>
                     </children>

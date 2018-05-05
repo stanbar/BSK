@@ -1,11 +1,16 @@
+
+
 import com.milbar.logic.FileCipherJob
 import com.milbar.logic.encryption.Algorithm
 import com.milbar.logic.encryption.Mode
 import org.junit.Assert.assertEquals
-
 import org.junit.Test
 import java.io.File
+import java.security.KeyFactory
+import java.security.KeyPairGenerator
 import java.security.SecureRandom
+import java.security.spec.KeySpec
+import java.security.spec.PKCS8EncodedKeySpec
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -16,6 +21,15 @@ import javax.xml.bind.DatatypeConverter
 
 class CipherTest {
 
+    @Test
+    fun testKeyPairGen() {
+        val rsa = KeyPairGenerator.getInstance("RSA").generateKeyPair()
+
+        val keySpec: KeySpec = PKCS8EncodedKeySpec(rsa.private.encoded)
+        val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpec)
+        assertEquals(rsa.private, privateKey)
+
+    }
 
     private val data = "Kotlin is the best lang ever !!!".toByteArray()
     // In no padding alg it must be multiple of 8(DES) or 16(AES)

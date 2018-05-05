@@ -19,19 +19,20 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.xml.bind.DatatypeConverter;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.security.Key;
+import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
@@ -55,7 +56,7 @@ public class MainWindowController implements JavaFXWindowsListener {
     public RadioButton radioButtonCFB;
     @FXML
     public RadioButton radioButtonOFB;
-    private Map<Mode, Toggle> modeToggleMap = new HashMap<Mode, Toggle>() {{
+    private Map<Mode, RadioButton> modeToggleMap = new HashMap<Mode, RadioButton>() {{
         Platform.runLater(() -> {
             put(Mode.ECB, radioButtonECB);
             put(Mode.CBC, radioButtonCBC);
@@ -73,11 +74,14 @@ public class MainWindowController implements JavaFXWindowsListener {
     public RadioButton radioButtonDES;
     @FXML
     public RadioButton radioButtonBlowfish;
+    @FXML
+    public RadioButton radioButtonRSA;
     private Map<Algorithm, Toggle> algorithmToggleMap = new HashMap<Algorithm, Toggle>() {{
         Platform.runLater(() -> {
             put(Algorithm.AES, radioButtonAES);
             put(Algorithm.DES, radioButtonDES);
             put(Algorithm.Blowfish, radioButtonBlowfish);
+            put(Algorithm.RSA, radioButtonRSA);
         });
     }};
 
@@ -93,7 +97,7 @@ public class MainWindowController implements JavaFXWindowsListener {
     private Set<String> openedWindows = new HashSet<>();
     private LoginWindow loginWindow;
     private UserCredentials userCredentials;
-    private final SimpleObjectProperty<SecretKey> privateKeyObservable = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<Key> privateKeyObservable = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<byte[]> initialVectorObservable = new SimpleObjectProperty<>();
 
 
@@ -180,7 +184,8 @@ public class MainWindowController implements JavaFXWindowsListener {
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         File file = fileChooser.showSaveDialog(null);
         if (file != null) {
-            ConfigManager.saveConfig(file, new CipherConfig(privateKeyObservable.get().getEncoded(),
+
+            file = ConfigManager.saveConfig(file, new CipherConfig(privateKeyObservable.get().getEncoded(),
                     initialVectorObservable.get(),
                     selectedEncryptionAlgorithm,
                     selectedBlockEncryptionMode));
@@ -225,17 +230,45 @@ public class MainWindowController implements JavaFXWindowsListener {
         algorithmToggleMap.get(algorithm).setSelected(true);
     }
 
-    @FXML
     private void refreshPrivateKey() throws NoSuchAlgorithmException {
-        privateKeyObservable.setValue(KeyGenerator.getInstance(selectedEncryptionAlgorithm.name()).generateKey());
+        if (selectedEncryptionAlgorithm == Algorithm.RSA)
+            privateKeyObservable.setValue(KeyPairGenerator.getInstance(selectedEncryptionAlgorithm.name()).generateKeyPair().getPrivate());
+        else
+            privateKeyObservable.setValue(KeyGenerator.getInstance(selectedEncryptionAlgorithm.name()).generateKey());
+
+
     }
 
-    @FXML
     private void refreshInitialVector() {
         if (selectedBlockEncryptionMode.initVectorRequired)
             initialVectorObservable.setValue(SecureRandom.getSeed(selectedEncryptionAlgorithm.initVectorSize));
         else
             initialVectorObservable.setValue("".getBytes());
+    }
+
+    private void refreshAvailableModes() {
+        modeToggleMap.forEach((key, value) -> {
+            boolean found = false;
+            for (Mode supportedMode : selectedEncryptionAlgorithm.supportedModes) {
+                if (supportedMode == key) found = true;
+            }
+            value.setDisable(!found);
+            if (value.isDisabled() && value.isSelected())
+                value.setSelected(false);
+        });
+        RadioButton selected = null;
+        for (RadioButton button : modeToggleMap.values()) {
+            if (button.isSelected())
+                selected = button;
+        }
+        if (selected == null) {
+            for (RadioButton button : modeToggleMap.values()) {
+                if (!button.isDisabled()) {
+                    button.setSelected(true);
+                    return;
+                }
+            }
+        }
     }
 
     private void createFileJobsList(FileCipherJob.CipherMode mode) {
@@ -332,13 +365,17 @@ public class MainWindowController implements JavaFXWindowsListener {
             case "radioButtonBlowfish":
                 selectedEncryptionAlgorithm = Algorithm.Blowfish;
                 break;
+            case "radioButtonRSA":
+                selectedEncryptionAlgorithm = Algorithm.RSA;
+                break;
             default:
                 throw new IllegalEventSourceException(rb.getId());
         }
         refreshPrivateKey();
         refreshInitialVector();
-        privateKeyObservable.setValue(KeyGenerator.getInstance(selectedEncryptionAlgorithm.name()).generateKey());
+        refreshAvailableModes();
     }
+
 
     @Override
     public void windowClosed(String callerClassName) {

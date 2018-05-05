@@ -11,19 +11,24 @@ object ConfigManager {
     private val gson = GsonBuilder().setPrettyPrinting().create()
 
 
-    @JvmStatic fun saveConfig(file: File, config: CipherConfig) = try {
-        val nameAndExtension = file.name.split(".")
-        val outputFile : File
-        outputFile = if (nameAndExtension.size == 1)
-            File(file.parent, file.name + ".json")
-        else
-            File(file.parent, nameAndExtension[0] + ".json")
+    @JvmStatic
+    fun saveConfig(file: File, config: CipherConfig): File {
+        try {
+            val nameAndExtension = file.name.split(".")
+            val outputFile: File
+            outputFile = if (nameAndExtension.size == 1)
+                File(file.parent, file.name + ".json")
+            else
+                File(file.parent, nameAndExtension[0] + ".json")
 
-        PrintWriter(outputFile).use { writer ->
-            writer.write(gson.toJson(config))
+            PrintWriter(outputFile).use { writer ->
+                writer.write(gson.toJson(config))
+            }
+            return outputFile
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+            return file
         }
-    } catch (e: FileNotFoundException) {
-        e.printStackTrace()
     }
 
     @JvmStatic

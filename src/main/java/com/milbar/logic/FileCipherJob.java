@@ -11,12 +11,12 @@ import javafx.concurrent.Task;
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
 public class FileCipherJob extends Task {
@@ -35,12 +35,12 @@ public class FileCipherJob extends Task {
     private final DoubleProperty progress = new SimpleDoubleProperty();
     private final Algorithm algorithm;
     private final Mode mode;
-    private final SecretKey secretKey;
+    private final Key secretKey;
     private final byte[] initVectorBytes;
     private final CipherMode cipherMode;
 
 
-    public FileCipherJob(File file, CipherMode cipherMode, Algorithm algorithm, Mode mode, SecretKey secretKey, byte[] initVectorBytes) {
+    public FileCipherJob(File file, CipherMode cipherMode, Algorithm algorithm, Mode mode, Key secretKey, byte[] initVectorBytes) {
         this.file = file;
         this.algorithm = algorithm;
         this.mode = mode;
@@ -70,9 +70,12 @@ public class FileCipherJob extends Task {
             FileAndExtension outputFileAndExtension = new FileAndExtension(outputFile);
 
             status.set(cipherMode == CipherMode.ENCRYPT ? "Encrypting data..." : "Decrypting data...");
+            long start = System.currentTimeMillis();
             cipher(fileAndExtension, outputFileAndExtension, cipherMode);
+            long total = System.currentTimeMillis() - start;
 
-            status.set(String.format("Done, saved %s data to file: %s",
+            status.set(String.format("[%d sec] Done, saved %s data to file: %s",
+                    total/1000,
                     cipherMode == CipherMode.ENCRYPT ? "encrypted" : "decrypted",
                     outputFileAndExtension.getFile().getAbsolutePath()));
 
