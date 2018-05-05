@@ -100,9 +100,6 @@
                                     <RadioButton fx:id="radioButtonBlowfish" mnemonicParsing="false"
                                                  onAction="#algorithmSelected" text="Blowfish"
                                                  toggleGroup="$algorithmToggleGroup"/>
-                                    <RadioButton fx:id="radioButtonRSA" mnemonicParsing="false"
-                                                 onAction="#algorithmSelected" text="RSA"
-                                                 toggleGroup="$algorithmToggleGroup"/>
                                 </VBox>
                                 <VBox layoutX="545.0" layoutY="12.0" spacing="10">
                                     <Label text="Block encryption mode"/>
