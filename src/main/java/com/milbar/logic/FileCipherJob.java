@@ -102,10 +102,15 @@ public class FileCipherJob extends Task {
 
         try (InputStream is = new FileInputStream(source.getFile());
              CipherOutputStream os = new CipherOutputStream(new FileOutputStream(destination.getFile()), cipher)) {
+            int totalSize = is.available();
             byte[] buffer = new byte[1024 * 8];
-            int count;
-            while ((count = is.read(buffer)) > 0)
-                os.write(buffer, 0, count);
+            int lastChunkSize;
+            int counter = 0;
+            while ((lastChunkSize = is.read(buffer)) > 0) {
+                os.write(buffer, 0, lastChunkSize);
+                counter += lastChunkSize;
+                setProgress((double)counter / (double)totalSize);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
