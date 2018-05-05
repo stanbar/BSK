@@ -235,7 +235,7 @@ class CipherTest {
     fun testEncryptFile() {
         val secretKey = KeyGenerator.getInstance(Algorithm.AES.name).generateKey()
         val encryptTask = FileCipherJob(File("/Users/admin1/Downloads/manning-publications-gradle-in-action.pdf"),
-                FileCipherJob.CipherMode.DECRYPT,
+                FileCipherJob.CipherMode.ENCRYPT,
                 Algorithm.AES,
                 Mode.ECB,
                 secretKey,

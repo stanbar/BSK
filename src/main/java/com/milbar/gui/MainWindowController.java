@@ -1,5 +1,6 @@
 package com.milbar.gui;
 
+import com.google.gson.Gson;
 import com.milbar.logic.FileCipherJob;
 import com.milbar.logic.encryption.Algorithm;
 import com.milbar.logic.encryption.Mode;
@@ -29,12 +30,12 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.xml.bind.DatatypeConverter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -58,6 +59,7 @@ public class MainWindowController implements JavaFXWindowsListener {
     private UserCredentials userCredentials;
     private final SimpleObjectProperty<SecretKey> privateKeyObservable = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<byte[]> initialVectorObservable = new SimpleObjectProperty<>();
+    private Gson gson = new Gson();
 
     @FXML
     TableColumn<FileCipherJob, String> imageNameColumn;
@@ -118,22 +120,36 @@ public class MainWindowController implements JavaFXWindowsListener {
     @FXML
     void encryptFilesButtonClicked() {
         createFileJobsList(FileCipherJob.CipherMode.ENCRYPT);
-
+        saveCipherSummary();
         if (filesSelected) {
             writeToLogLabel("Starting encryption of " + filesSelectedAmount + " files.");
+            tableElementsList.forEach(task -> executor.submit(task));
+        }
+    }
+
+
+    @FXML
+    void decryptFilesButtonClicked() {
+        createFileJobsList(FileCipherJob.CipherMode.DECRYPT);
+        saveCipherSummary();
+        if (filesSelected) {
+            writeToLogLabel("Starting decryption of " + filesSelectedAmount + " files.");
             tableElementsList.forEach(task -> executor.submit(task));
 
         }
     }
 
-    @FXML
-    void decryptFilesButtonClicked() {
-        createFileJobsList(FileCipherJob.CipherMode.DECRYPT);
+    private void saveCipherSummary() {
+        Map<String, Object> summaryMap = new HashMap<>();
+        summaryMap.put("privateKey", DatatypeConverter.printHexBinary(privateKeyObservable.get().getEncoded()));
+        summaryMap.put("initialVector", DatatypeConverter.printHexBinary(initialVectorObservable.get()));
+        String json = gson.toJson(summaryMap);
 
-        if (filesSelected) {
-            writeToLogLabel("Starting decryption of " + filesSelectedAmount + " files.");
-            tableElementsList.forEach(task -> executor.submit(task));
-
+        File outputDetails = new File(System.getProperty("user.dir"), "outputSummary.json");
+        try (PrintWriter writer = new PrintWriter(outputDetails)) {
+            writer.write(json);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

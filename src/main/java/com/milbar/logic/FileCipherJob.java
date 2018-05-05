@@ -8,17 +8,18 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
 
-import javax.crypto.*;
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.xml.bind.DatatypeConverter;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.*;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-public class FileCipherJob extends Task<byte[]> {
+public class FileCipherJob extends Task {
     public enum CipherMode {
         ENCRYPT(Cipher.ENCRYPT_MODE), DECRYPT(Cipher.DECRYPT_MODE);
         int cipherMode;
@@ -57,49 +58,39 @@ public class FileCipherJob extends Task<byte[]> {
     }
 
     @Override
-    public byte[]
-    call() {
+    public Object call() {
         try {
             fileAndExtension = new FileAndExtension(file);
             String name = fileAndExtension.getFileName();
             String extension = fileAndExtension.getFileExtension();
-            status.set("Reading bytes from file...");
-            setProgress(.1);
-
-            byte[] inputData = Files.readAllBytes(file.toPath());
-            setProgress(.2);
-            status.set(cipherMode == CipherMode.ENCRYPT ? "Encrypting data..." : "Decrypting data...");
-            byte[] outputData = cipher(inputData, cipherMode);
-            setProgress(.8);
 
             File outputFile = new File(file.getParent(), String.format("%s_%s.%s",
                     cipherMode == CipherMode.ENCRYPT ? "encrypted" : "decrypted", name, extension));
 
             FileAndExtension outputFileAndExtension = new FileAndExtension(outputFile);
 
-            status.set(String.format("Saving %s data to file: %s",
+            status.set(cipherMode == CipherMode.ENCRYPT ? "Encrypting data..." : "Decrypting data...");
+            cipher(fileAndExtension, outputFileAndExtension, cipherMode);
+
+            status.set(String.format("Done, saved %s data to file: %s",
                     cipherMode == CipherMode.ENCRYPT ? "encrypted" : "decrypted",
                     outputFileAndExtension.getFile().getAbsolutePath()));
 
-            Files.write(outputFileAndExtension.getFile().toPath(), outputData);
-            status.set("Done, saved to " + outputFileAndExtension.getFile().getAbsolutePath());
             setProgress(1.0);
-
-            return outputData;
-
-        } catch (IllegalFileNameException | IOException | NoSuchAlgorithmException | InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | NoSuchPaddingException | IllegalBlockSizeException e) {
+        } catch (IllegalFileNameException | NoSuchAlgorithmException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException e) {
             status.set(e.getMessage());
             e.printStackTrace();
-            return null;
         }
 
+        return null;
     }
 
-    private byte[] cipher(byte[] data, CipherMode cipherMode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException {
+    private void cipher(FileAndExtension source, FileAndExtension destination, CipherMode cipherMode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
         Cipher cipher = Cipher.getInstance(algorithm.name() + "/" + mode.name() + "/PKCS5Padding");
 
         IvParameterSpec initVector = new IvParameterSpec(initVectorBytes);
 
+        //TODO security leak, remove this log
         System.out.printf("Using key: %s and InitVector: %s%n",
                 DatatypeConverter.printHexBinary(secretKey.getEncoded()),
                 DatatypeConverter.printHexBinary(initVectorBytes));
@@ -109,7 +100,17 @@ public class FileCipherJob extends Task<byte[]> {
         else
             cipher.init(cipherMode.cipherMode, secretKey, initVector);
 
-        return cipher.doFinal(data);
+        try (InputStream is = new FileInputStream(source.getFile());
+             CipherOutputStream os = new CipherOutputStream(new FileOutputStream(destination.getFile()), cipher)) {
+            byte[] buffer = new byte[1024 * 8];
+            int count;
+            while ((count = is.read(buffer)) > 0)
+                os.write(buffer, 0, count);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public File getFile() {
@@ -124,7 +125,7 @@ public class FileCipherJob extends Task<byte[]> {
         return progress;
     }
 
-    public void setProgress(double progress) {
+    private void setProgress(double progress) {
         this.progress.set(progress);
     }
 
