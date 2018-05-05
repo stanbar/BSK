@@ -9,6 +9,7 @@ import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
 import com.milbar.logic.login.UserCredentials;
 import com.milbar.model.CipherConfig;
 import com.stasbar.Logger;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -55,11 +56,14 @@ public class MainWindowController implements JavaFXWindowsListener {
     @FXML
     public RadioButton radioButtonOFB;
     private Map<Mode, Toggle> modeToggleMap = new HashMap<Mode, Toggle>() {{
-        put(Mode.ECB, radioButtonECB);
-        put(Mode.CBC, radioButtonCBC);
-        put(Mode.CFB, radioButtonCFB);
-        put(Mode.OFB, radioButtonOFB);
+        Platform.runLater(() -> {
+            put(Mode.ECB, radioButtonECB);
+            put(Mode.CBC, radioButtonCBC);
+            put(Mode.CFB, radioButtonCFB);
+            put(Mode.OFB, radioButtonOFB);
+        });
     }};
+
 
     @FXML
     public ToggleGroup algorithmToggleGroup;
@@ -70,9 +74,11 @@ public class MainWindowController implements JavaFXWindowsListener {
     @FXML
     public RadioButton radioButtonBlowfish;
     private Map<Algorithm, Toggle> algorithmToggleMap = new HashMap<Algorithm, Toggle>() {{
-        put(Algorithm.AES, radioButtonAES);
-        put(Algorithm.DES, radioButtonDES);
-        put(Algorithm.Blowfish, radioButtonBlowfish);
+        Platform.runLater(() -> {
+            put(Algorithm.AES, radioButtonAES);
+            put(Algorithm.DES, radioButtonDES);
+            put(Algorithm.Blowfish, radioButtonBlowfish);
+        });
     }};
 
 
@@ -171,12 +177,19 @@ public class MainWindowController implements JavaFXWindowsListener {
     void saveCipherConfig() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save cipher config");
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         File file = fileChooser.showSaveDialog(null);
         if (file != null) {
             ConfigManager.saveConfig(file, new CipherConfig(privateKeyObservable.get().getEncoded(),
                     initialVectorObservable.get(),
                     selectedEncryptionAlgorithm,
                     selectedBlockEncryptionMode));
+            try {
+                Desktop.getDesktop().open(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Logger.err(e);
+            }
         }
 
 
@@ -185,12 +198,13 @@ public class MainWindowController implements JavaFXWindowsListener {
     @FXML
     void loadCipherConfig() {
         FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Load cipher config");
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("JSON", "*.json"),
                 new FileChooser.ExtensionFilter("All types", "*.*")
         );
-        fileChooser.setTitle("Load cipher config");
+
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
             CipherConfig config = ConfigManager.loadConfig(file);
@@ -198,20 +212,17 @@ public class MainWindowController implements JavaFXWindowsListener {
             initialVectorObservable.setValue(config.getInitialVectorBytes());
             selectToggleMode(config.getMode());
             selectToggleAlgorithm(config.getAlgorithm());
-            try {
-                Desktop.getDesktop().open(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     private void selectToggleMode(Mode mode) {
-        modeToggleGroup.selectToggle(modeToggleMap.get(mode));
+        //modeToggleGroup.selectToggle(modeToggleMap.get(mode));
+        modeToggleMap.get(mode).setSelected(true);
     }
 
     private void selectToggleAlgorithm(Algorithm algorithm) {
-        algorithmToggleGroup.selectToggle(algorithmToggleMap.get(algorithm));
+        //algorithmToggleGroup.selectToggle(algorithmToggleMap.get(algorithm));
+        algorithmToggleMap.get(algorithm).setSelected(true);
     }
 
     @FXML

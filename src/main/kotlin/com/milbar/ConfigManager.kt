@@ -9,8 +9,9 @@ import java.io.PrintWriter
 
 object ConfigManager {
     private val gson = GsonBuilder().setPrettyPrinting().create()
-    @JvmStatic
-    fun saveConfig(file: File, config: CipherConfig) = try {
+
+
+    @JvmStatic fun saveConfig(file: File, config: CipherConfig) = try {
         val nameAndExtension = file.name.split(".")
         val outputFile : File
         outputFile = if (nameAndExtension.size == 1)
