@@ -1,12 +1,13 @@
 package com.milbar.gui;
 
-import com.google.gson.Gson;
+import com.milbar.ConfigManager;
 import com.milbar.logic.FileCipherJob;
 import com.milbar.logic.encryption.Algorithm;
 import com.milbar.logic.encryption.Mode;
 import com.milbar.logic.exceptions.IllegalEventSourceException;
 import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
 import com.milbar.logic.login.UserCredentials;
+import com.milbar.model.CipherConfig;
 import com.stasbar.Logger;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,10 +18,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
@@ -29,13 +28,13 @@ import javafx.stage.Stage;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.xml.bind.DatatypeConverter;
+import java.awt.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,7 +43,38 @@ public class MainWindowController implements JavaFXWindowsListener {
     private final static int THREADS_POOL_SIZE = 4;
     private final static Mode DEFAULT_BLOCK_ENCRYPTION_MODE = Mode.ECB;
     private final static Algorithm DEFAULT_ENCRYPTION_ALGORITHM = Algorithm.DES;
-    private final static String DEFAULT_RADIO_BUTTON_NAME = "radioButton";
+
+    @FXML
+    public ToggleGroup modeToggleGroup;
+    @FXML
+    public RadioButton radioButtonECB;
+    @FXML
+    public RadioButton radioButtonCBC;
+    @FXML
+    public RadioButton radioButtonCFB;
+    @FXML
+    public RadioButton radioButtonOFB;
+    private Map<Mode, Toggle> modeToggleMap = new HashMap<Mode, Toggle>() {{
+        put(Mode.ECB, radioButtonECB);
+        put(Mode.CBC, radioButtonCBC);
+        put(Mode.CFB, radioButtonCFB);
+        put(Mode.OFB, radioButtonOFB);
+    }};
+
+    @FXML
+    public ToggleGroup algorithmToggleGroup;
+    @FXML
+    public RadioButton radioButtonAES;
+    @FXML
+    public RadioButton radioButtonDES;
+    @FXML
+    public RadioButton radioButtonBlowfish;
+    private Map<Algorithm, Toggle> algorithmToggleMap = new HashMap<Algorithm, Toggle>() {{
+        put(Algorithm.AES, radioButtonAES);
+        put(Algorithm.DES, radioButtonDES);
+        put(Algorithm.Blowfish, radioButtonBlowfish);
+    }};
+
 
     private ExecutorService executor = Executors.newFixedThreadPool(THREADS_POOL_SIZE);
     private ObservableList<FileCipherJob> tableElementsList = FXCollections.observableArrayList();
@@ -59,7 +89,7 @@ public class MainWindowController implements JavaFXWindowsListener {
     private UserCredentials userCredentials;
     private final SimpleObjectProperty<SecretKey> privateKeyObservable = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<byte[]> initialVectorObservable = new SimpleObjectProperty<>();
-    private Gson gson = new Gson();
+
 
     @FXML
     TableColumn<FileCipherJob, String> imageNameColumn;
@@ -120,7 +150,6 @@ public class MainWindowController implements JavaFXWindowsListener {
     @FXML
     void encryptFilesButtonClicked() {
         createFileJobsList(FileCipherJob.CipherMode.ENCRYPT);
-        saveCipherSummary();
         if (filesSelected) {
             writeToLogLabel("Starting encryption of " + filesSelectedAmount + " files.");
             tableElementsList.forEach(task -> executor.submit(task));
@@ -131,7 +160,6 @@ public class MainWindowController implements JavaFXWindowsListener {
     @FXML
     void decryptFilesButtonClicked() {
         createFileJobsList(FileCipherJob.CipherMode.DECRYPT);
-        saveCipherSummary();
         if (filesSelected) {
             writeToLogLabel("Starting decryption of " + filesSelectedAmount + " files.");
             tableElementsList.forEach(task -> executor.submit(task));
@@ -139,27 +167,60 @@ public class MainWindowController implements JavaFXWindowsListener {
         }
     }
 
-    private void saveCipherSummary() {
-        Map<String, Object> summaryMap = new HashMap<>();
-        summaryMap.put("privateKey", DatatypeConverter.printHexBinary(privateKeyObservable.get().getEncoded()));
-        summaryMap.put("initialVector", DatatypeConverter.printHexBinary(initialVectorObservable.get()));
-        String json = gson.toJson(summaryMap);
-
-        File outputDetails = new File(System.getProperty("user.dir"), "outputSummary.json");
-        try (PrintWriter writer = new PrintWriter(outputDetails)) {
-            writer.write(json);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+    @FXML
+    void saveCipherConfig() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save cipher config");
+        File file = fileChooser.showSaveDialog(null);
+        if (file != null) {
+            ConfigManager.saveConfig(file, new CipherConfig(privateKeyObservable.get().getEncoded(),
+                    initialVectorObservable.get(),
+                    selectedEncryptionAlgorithm,
+                    selectedBlockEncryptionMode));
         }
+
+
     }
 
     @FXML
-    void refreshPrivateKey() throws NoSuchAlgorithmException {
+    void loadCipherConfig() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("JSON", "*.json"),
+                new FileChooser.ExtensionFilter("All types", "*.*")
+        );
+        fileChooser.setTitle("Load cipher config");
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            CipherConfig config = ConfigManager.loadConfig(file);
+            privateKeyObservable.setValue(config.getSecretKey());
+            initialVectorObservable.setValue(config.getInitialVectorBytes());
+            selectToggleMode(config.getMode());
+            selectToggleAlgorithm(config.getAlgorithm());
+            try {
+                Desktop.getDesktop().open(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void selectToggleMode(Mode mode) {
+        modeToggleGroup.selectToggle(modeToggleMap.get(mode));
+    }
+
+    private void selectToggleAlgorithm(Algorithm algorithm) {
+        algorithmToggleGroup.selectToggle(algorithmToggleMap.get(algorithm));
+    }
+
+    @FXML
+    private void refreshPrivateKey() throws NoSuchAlgorithmException {
         privateKeyObservable.setValue(KeyGenerator.getInstance(selectedEncryptionAlgorithm.name()).generateKey());
     }
 
     @FXML
-    void refreshInitialVector() {
+    private void refreshInitialVector() {
         if (selectedBlockEncryptionMode.initVectorRequired)
             initialVectorObservable.setValue(SecureRandom.getSeed(selectedEncryptionAlgorithm.initVectorSize));
         else
@@ -226,17 +287,17 @@ public class MainWindowController implements JavaFXWindowsListener {
     public void radioButtonSelected(ActionEvent event) throws IllegalEventSourceException {
         RadioButton rb = (RadioButton) event.getSource();
 
-        switch (getRadioButtonNumber(rb)) {
-            case "1":
+        switch (rb.getId()) {
+            case "radioButtonECB":
                 selectedBlockEncryptionMode = Mode.ECB;
                 break;
-            case "2":
+            case "radioButtonCBC":
                 selectedBlockEncryptionMode = Mode.CBC;
                 break;
-            case "3":
+            case "radioButtonCFB":
                 selectedBlockEncryptionMode = Mode.CFB;
                 break;
-            case "4":
+            case "radioButtonOFB":
                 selectedBlockEncryptionMode = Mode.OFB;
                 break;
             default:
@@ -245,15 +306,16 @@ public class MainWindowController implements JavaFXWindowsListener {
         refreshInitialVector();
     }
 
+
     @FXML
     public void algorithmSelected(ActionEvent event) throws IllegalEventSourceException, NoSuchAlgorithmException {
         RadioButton rb = (RadioButton) event.getSource();
 
         switch (rb.getId()) {
-            case "radioButtonAes":
+            case "radioButtonAES":
                 selectedEncryptionAlgorithm = Algorithm.AES;
                 break;
-            case "radioButtonDes":
+            case "radioButtonDES":
                 selectedEncryptionAlgorithm = Algorithm.DES;
                 break;
             case "radioButtonBlowfish":
@@ -278,11 +340,6 @@ public class MainWindowController implements JavaFXWindowsListener {
         Logger.info(log);
     }
 
-    private String getRadioButtonNumber(RadioButton radioButton) {
-        String radioButtonId = radioButton.getId();
-        String radioButtonNameAndNumber[] = radioButtonId.split(DEFAULT_RADIO_BUTTON_NAME);
-        return radioButtonNameAndNumber.length > 1 ? radioButtonNameAndNumber[1] : "-1";
-    }
 
     private void openNewWindow(String fxmlPath, String windowTitle) {
         try {

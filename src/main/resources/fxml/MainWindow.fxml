@@ -57,45 +57,51 @@
                                     onAction="#chooseFilesButtonClicked" text="Choose files"/>
                             <HBox spacing="10">
                                 <Button mnemonicParsing="false"
+                                        onAction="#loadCipherConfig" text="Load cipher config"/>
+                                <Button mnemonicParsing="false"
+                                        onAction="#saveCipherConfig" text="Save cipher config"/>
+                            </HBox>
+                            <HBox spacing="10">
+                                <Button mnemonicParsing="false"
                                         onAction="#encryptFilesButtonClicked" text="Encrypt files"/>
                                 <Button mnemonicParsing="false"
                                         onAction="#decryptFilesButtonClicked" text="Decrypt files"/>
                             </HBox>
 
-                            <ProgressBar fx:id="encryptionProgressBar" minWidth="200" />
+                            <ProgressBar fx:id="encryptionProgressBar" minWidth="200"/>
                         </VBox>
                         <VBox layoutX="545.0" layoutY="12.0" spacing="10">
                             <Label text="Block encryption mode"/>
-                            <RadioButton fx:id="radioButton1" mnemonicParsing="false" onAction="#radioButtonSelected"
+                            <RadioButton fx:id="radioButtonECB" mnemonicParsing="false" onAction="#radioButtonSelected"
                                          selected="true" stylesheets="@../css/MainWindow.css" text="ECB">
                                 <toggleGroup>
-                                    <ToggleGroup fx:id="encryptionModeToggleGroup"/>
+                                    <ToggleGroup fx:id="modeToggleGroup"/>
                                 </toggleGroup>
                             </RadioButton>
 
-                            <RadioButton fx:id="radioButton2" mnemonicParsing="false" onAction="#radioButtonSelected"
+                            <RadioButton fx:id="radioButtonCBC" mnemonicParsing="false" onAction="#radioButtonSelected"
                                          stylesheets="@../css/MainWindow.css" text="CBC"
-                                         toggleGroup="$encryptionModeToggleGroup"/>
+                                         toggleGroup="$modeToggleGroup"/>
 
-                            <RadioButton fx:id="radioButton3" mnemonicParsing="false" onAction="#radioButtonSelected"
+                            <RadioButton fx:id="radioButtonCFB" mnemonicParsing="false" onAction="#radioButtonSelected"
                                          stylesheets="@../css/MainWindow.css" text="CFB"
-                                         toggleGroup="$encryptionModeToggleGroup"/>
+                                         toggleGroup="$modeToggleGroup"/>
 
-                            <RadioButton fx:id="radioButton4" mnemonicParsing="false" onAction="#radioButtonSelected"
+                            <RadioButton fx:id="radioButtonOFB" mnemonicParsing="false" onAction="#radioButtonSelected"
                                          stylesheets="@../css/MainWindow.css" text="OFB"
-                                         toggleGroup="$encryptionModeToggleGroup"/>
+                                         toggleGroup="$modeToggleGroup"/>
                         </VBox>
 
 
                         <VBox layoutX="445.0" layoutY="12.0" spacing="10">
                             <Label text="Algorithm"/>
-                            <RadioButton fx:id="radioButtonAes" mnemonicParsing="false" onAction="#algorithmSelected"
+                            <RadioButton fx:id="radioButtonAES" mnemonicParsing="false" onAction="#algorithmSelected"
                                          selected="true" text="AES" toggleGroup="$algorithmToggleGroup">
                                 <toggleGroup>
                                     <ToggleGroup fx:id="algorithmToggleGroup"/>
                                 </toggleGroup>
                             </RadioButton>
-                            <RadioButton fx:id="radioButtonDes" mnemonicParsing="false" onAction="#algorithmSelected"
+                            <RadioButton fx:id="radioButtonDES" mnemonicParsing="false" onAction="#algorithmSelected"
                                          text="DES" toggleGroup="$algorithmToggleGroup"/>
 
                             <RadioButton fx:id="radioButtonBlowfish" mnemonicParsing="false"
