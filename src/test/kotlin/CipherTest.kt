@@ -1,11 +1,10 @@
-
-
 import com.milbar.logic.FileCipherJob
 import com.milbar.logic.encryption.Algorithm
 import com.milbar.logic.encryption.Mode
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.File
+import java.nio.file.Files
 import java.security.KeyFactory
 import java.security.KeyPairGenerator
 import java.security.SecureRandom
@@ -248,19 +247,25 @@ class CipherTest {
     @Test
     fun testEncryptFile() {
         val secretKey = KeyGenerator.getInstance(Algorithm.AES.name).generateKey()
-        val encryptTask = FileCipherJob(File("/Users/admin1/Downloads/manning-publications-gradle-in-action.pdf"),
+        val file = File("/Users/admin1/Downloads/manning-publications-gradle-in-action.pdf");
+        val encryptTask = FileCipherJob(file,
                 FileCipherJob.CipherMode.ENCRYPT,
                 Algorithm.AES,
                 Mode.ECB,
                 secretKey,
                 "".toByteArray())
-
         encryptTask.call()
-        val decryptTask = FileCipherJob(File("/Users/admin1/Downloads/encrypted_manning-publications-gradle-in-action.pdf"),
+
+        val encryptedFile = File("/Users/admin1/Downloads/encrypted_manning-publications-gradle-in-action.pdf")
+        val decryptTask = FileCipherJob(encryptedFile,
                 FileCipherJob.CipherMode.DECRYPT,
                 Algorithm.AES,
                 Mode.ECB, secretKey, "".toByteArray())
         decryptTask.call()
+        val decryptedFile = File("/Users/admin1/Downloads/decrypted_encrypted_manning-publications-gradle-in-action.pdf")
+
+        assert(Arrays.equals(Files.readAllBytes(decryptedFile.toPath()),Files.readAllBytes(file.toPath())))
+
     }
 
 

@@ -1,45 +1,64 @@
+import com.milbar.logic.encryption.RSA
 import org.junit.Test
-import java.math.BigInteger
+import java.io.File
 import java.util.*
 
 class TestRsa {
+
     @Test
-    fun testRsa(args: Array<String>) {
+    fun testRsa() {
+        val rsa = RSA(128)
+        val plainText = "Kotlin is the best".toByteArray()
 
-        val plainText = BigInteger("Kotlin is the best".toByteArray())
+        val encrypted = rsa.encrypt(plainText)
+        val decrypted = rsa.decrypt(encrypted)
 
-        val size = 512
-        /* Step 1: Select two large prime numbers. Say p and q. */
-        val p = BigInteger(size, 15, Random())
-        val q = BigInteger(size, 15, Random())
-        /* Step 2: Calculate n = p.q */
-        val n: BigInteger = p.multiply(q)
-        /* Step 3: Calculate ø(n) = (p - 1).(q - 1) */
-        val phiN = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE))
-        /* Step 4: Find e such that gcd(e, ø(n)) = 1 ; 1 < e < ø(n) */
-        var e: BigInteger
-        do {
-            e = BigInteger(2 * size, Random())
-        } while (e.compareTo(phiN) != 1 || e.gcd(phiN).compareTo(BigInteger.valueOf(1)) != 0)
-        /* Step 5: Calculate d such that e.d = 1 (mod ø(n)) */
-        val d: BigInteger = e.modInverse(phiN)
+        println("Plaintext[${plainText.size}]: ${String(plainText)}")
+        println("Encrypted[${encrypted.size}]: ${String(encrypted)}")
+        println("Decrypted[${decrypted.size}]: ${String(decrypted)}")
 
-        val cipherText: BigInteger = encrypt(plainText, e, n)
+        assert(Arrays.equals(plainText, decrypted))
 
-        println("Plaintext : ${String(plainText.toByteArray())}")
-        println("CipherText : ${String(cipherText.toByteArray())}")
-        val decrypted = decrypt(cipherText, d, n)
-        println("After Decryption Plaintext : ${String(decrypted.toByteArray())}")
     }
 
 
-    private fun encrypt(plaintext: BigInteger, e: BigInteger, n: BigInteger): BigInteger {
-        return plaintext.modPow(e, n)
+    @Test
+    fun testRsaOnSmallFile() {
+        val rsa = RSA()
+        val testFile = File("test.txt")
+        testFile.writeBytes("Kotlin is the best".toByteArray())
+
+        val encryptedBytes = rsa.encrypt(testFile.readBytes())
+        val encryptedFile = File("encrypted_${testFile.name}")
+        encryptedFile.writeBytes(encryptedBytes)
+
+        val decryptedBytes = rsa.decrypt(encryptedBytes)
+        val decryptedFile = File("decrypted_encrypted_${testFile.name}")
+        decryptedFile.writeBytes(decryptedBytes)
+
+        assert(Arrays.equals(testFile.readBytes(), decryptedFile.readBytes()))
     }
 
-    private fun decrypt(cipherText: BigInteger, d: BigInteger, n: BigInteger): BigInteger {
-        return cipherText.modPow(d, n)
-    }
+    @Test
+    fun testRsaOnMediumFile() {
 
+        val testFile = File("test.txt")
+        testFile.writeBytes("Kotlin is the best\n".repeat(50).toByteArray())
+
+        println("File length: ${testFile.length()}")
+        val keySize = RSA.keySizeForBlock(testFile.length())
+        println("KeySize: $keySize")
+        val rsa = RSA(keySize)
+
+        val encryptedBytes = rsa.encrypt(testFile.readBytes())
+        val encryptedFile = File("encrypted_${testFile.name}")
+        encryptedFile.writeBytes(encryptedBytes)
+
+        val decryptedBytes = rsa.decrypt(encryptedBytes)
+        val decryptedFile = File("decrypted_encrypted_${testFile.name}")
+        decryptedFile.writeBytes(decryptedBytes)
+
+        assert(Arrays.equals(testFile.readBytes(), decryptedFile.readBytes()))
+    }
 
 }
