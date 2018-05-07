@@ -97,10 +97,23 @@
                                                  onAction="#algorithmSelected" text="DES"
                                                  toggleGroup="$algorithmToggleGroup"/>
 
+                                    <RadioButton fx:id="radioButtonDESeee" mnemonicParsing="false"
+                                                 onAction="#algorithmSelected" text="DESeee"
+                                                 toggleGroup="$algorithmToggleGroup"/>
+                                    <RadioButton fx:id="radioButtonDESede2" mnemonicParsing="false"
+                                                 onAction="#algorithmSelected" text="DESede2"
+                                                 toggleGroup="$algorithmToggleGroup"/>
+                                    <RadioButton fx:id="radioButtonDESede3" mnemonicParsing="false"
+                                                 onAction="#algorithmSelected" text="DESede3"
+                                                 toggleGroup="$algorithmToggleGroup"/>
+
+
                                     <RadioButton fx:id="radioButtonBlowfish" mnemonicParsing="false"
                                                  onAction="#algorithmSelected" text="Blowfish"
                                                  toggleGroup="$algorithmToggleGroup"/>
                                 </VBox>
+
+
                                 <VBox layoutX="545.0" layoutY="12.0" spacing="10">
                                     <Label text="Block encryption mode"/>
                                     <RadioButton fx:id="radioButtonECB" mnemonicParsing="false"

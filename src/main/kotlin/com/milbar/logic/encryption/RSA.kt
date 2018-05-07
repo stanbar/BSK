@@ -4,17 +4,18 @@ import java.math.BigInteger
 import java.util.*
 
 class RSA(size: Int = 512) {
-    /* Select two large prime numbers. Say p and q. */
-    private val p: BigInteger = BigInteger(size, 15, Random())
-    private val q: BigInteger = BigInteger(size, 15, Random())
+
     /* Calculate n = p.q */
-    private val n: BigInteger = p.multiply(q)
+    private val n: BigInteger
     /* Calculate ø(n) = (p - 1).(q - 1) */
-    private val phiN = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE))
     private val e: BigInteger
     private val d: BigInteger
 
-    init {
+    init {/* Select two large prime numbers. Say p and q. */
+        val p = BigInteger(size, 15, Random())
+        val q = BigInteger(size, 15, Random())
+        n = p.multiply(q)
+        val phiN: BigInteger = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE))
         /* Find e such that gcd(e, ø(n)) = 1 ; 1 < e < ø(n) */
         var _e: BigInteger
         do {
@@ -41,6 +42,11 @@ class RSA(size: Int = 512) {
         return BigInteger(bytes).modPow(d, n).toByteArray()
     }
 
+    fun print(): String {
+        val encoder = Base64.getEncoder();
+        return "n: ${encoder.encodeToString(n.toByteArray())}\ne:${encoder.encodeToString(e.toByteArray())}\nd:${encoder.encodeToString(d.toByteArray())}"
+    }
+
     companion object {
         fun maxBlockSizeForKey(keySize: Int): Int {
             return ((keySize - 384) / 8) + 37
@@ -49,6 +55,7 @@ class RSA(size: Int = 512) {
         fun keySizeForBlock(blockSize: Int): Int {
             return ((blockSize - 37) * 8) + 384
         }
+
         fun keySizeForBlock(blockSize: Long): Int {
             return (((blockSize - 37) * 8) + 384).toInt()
         }

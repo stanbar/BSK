@@ -68,17 +68,24 @@ public class MainWindowController implements JavaFXWindowsListener {
     @FXML
     public ToggleGroup algorithmToggleGroup;
     @FXML
-    public RadioButton radioButtonAES;
-    @FXML
     public RadioButton radioButtonDES;
     @FXML
-    public RadioButton radioButtonBlowfish;
+    public RadioButton radioButtonDESeee;
     @FXML
-    public RadioButton radioButtonRSA;
+    public RadioButton radioButtonDESede2;
+    @FXML
+    public RadioButton radioButtonDESede3;
+    @FXML
+    public RadioButton radioButtonAES;
+    @FXML
+    public RadioButton radioButtonBlowfish;
     private Map<Algorithm, Toggle> algorithmToggleMap = new HashMap<Algorithm, Toggle>() {{
         Platform.runLater(() -> {
             put(Algorithm.AES, radioButtonAES);
             put(Algorithm.DES, radioButtonDES);
+            put(Algorithm.DESeee, radioButtonDESeee);
+            put(Algorithm.DESede2, radioButtonDESede2);
+            put(Algorithm.DESede3, radioButtonDESede3);
             put(Algorithm.Blowfish, radioButtonBlowfish);
         });
     }};
@@ -229,10 +236,10 @@ public class MainWindowController implements JavaFXWindowsListener {
     }
 
     private void refreshPrivateKey() throws NoSuchAlgorithmException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(selectedEncryptionAlgorithm.name);
+        keyGenerator.init(selectedEncryptionAlgorithm.keySize);
 
-        privateKeyObservable.setValue(KeyGenerator.getInstance(selectedEncryptionAlgorithm.name()).generateKey());
-
-
+        privateKeyObservable.setValue(keyGenerator.generateKey());
     }
 
     private void refreshInitialVector() {
@@ -332,6 +339,15 @@ public class MainWindowController implements JavaFXWindowsListener {
                 break;
             case "radioButtonDES":
                 selectedEncryptionAlgorithm = Algorithm.DES;
+                break;
+            case "radioButtonDESeee":
+                selectedEncryptionAlgorithm = Algorithm.DESeee;
+                break;
+            case "radioButtonDESede2":
+                selectedEncryptionAlgorithm = Algorithm.DESede2;
+                break;
+            case "radioButtonDESede3":
+                selectedEncryptionAlgorithm = Algorithm.DESede3;
                 break;
             case "radioButtonBlowfish":
                 selectedEncryptionAlgorithm = Algorithm.Blowfish;

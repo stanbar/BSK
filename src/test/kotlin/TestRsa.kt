@@ -7,7 +7,8 @@ class TestRsa {
 
     @Test
     fun testRsa() {
-        val rsa = RSA(128)
+        val rsa = RSA(512)
+        println(rsa.print())
         val plainText = "Kotlin is the best".toByteArray()
 
         val encrypted = rsa.encrypt(plainText)
@@ -21,6 +22,20 @@ class TestRsa {
 
     }
 
+    @Test
+    fun testSymetryOfRSAKeys() {
+        val rsa = RSA(512)
+        val plainText = "Kotlin is the best".toByteArray()
+
+        val encrypted = rsa.decrypt(plainText) // Here we first "decrypt"
+        val decrypted = rsa.encrypt(encrypted) // then we "encrypt"
+
+        println("Plaintext[${plainText.size}]: ${String(plainText)}")
+        println("Encrypted[${encrypted.size}]: ${String(encrypted)}")
+        println("Decrypted[${decrypted.size}]: ${String(decrypted)}")
+
+        assert(Arrays.equals(plainText, decrypted))
+    }
 
 
     @Test

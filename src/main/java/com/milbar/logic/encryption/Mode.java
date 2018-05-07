@@ -1,5 +1,9 @@
 package com.milbar.logic.encryption;
 
+/**
+ * https://docs.oracle.com/javase/6/docs/technotes/guides/security/SunProviders.html
+ */
+
 public enum Mode {
     ECB("ElectronicCodebook", false),
     CBC("CipherBlockChaining", true),
