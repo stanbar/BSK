@@ -260,6 +260,7 @@ public class MainWindowController implements JavaFXWindowsListener {
     }
 
     private void refreshTable() {
+
         imageNameColumn.setCellValueFactory( //nazwa pliku
                 p -> new SimpleStringProperty(p.getValue().getFile().getName()));
 

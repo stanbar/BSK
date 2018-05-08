@@ -159,11 +159,12 @@
                         <TableView fx:id="filesTable" layoutX="74.0" layoutY="58.0" prefHeight="316.3826191904688"
                                    prefWidth="722.0869804742889" stylesheets="@../css/MainWindow.css"
                                    AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
+                                   editable="true">
                             <columns>
-                                <TableColumn fx:id="imageNameColumn" prefWidth="178.0" text="Name"/>
+                                <TableColumn fx:id="imageNameColumn" prefWidth="178.0" text="Name" />
                                 <TableColumn fx:id="progressColumn" prefWidth="190.0" text="Progress"/>
-                                <TableColumn fx:id="statusColumn" minWidth="0.0" prefWidth="176.0" text="Status"/>
+                                <TableColumn fx:id="statusColumn" minWidth="0.0" prefWidth="320.0" text="Status"/>
                             </columns>
                         </TableView>
                     </children>
