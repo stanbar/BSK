@@ -1,6 +1,7 @@
 package com.milbar.gui;
 
 import com.milbar.ConfigManager;
+import com.milbar.gui.abstracts.factories.LoggerFactory;
 import com.milbar.logic.FileCipherJob;
 import com.milbar.logic.encryption.Algorithm;
 import com.milbar.logic.encryption.Mode;
@@ -8,7 +9,6 @@ import com.milbar.logic.exceptions.IllegalEventSourceException;
 import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
 import com.milbar.logic.login.UserCredentials;
 import com.milbar.model.CipherConfig;
-import com.stasbar.Logger;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -25,6 +25,8 @@ import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import jdk.jshell.spi.ExecutionControl;
+import org.apache.commons.lang.NotImplementedException;
 
 import javax.crypto.KeyGenerator;
 import javax.xml.bind.DatatypeConverter;
@@ -38,9 +40,13 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class MainWindowController implements JavaFXWindowsListener {
+public class MainWindowController extends JavaFXController implements JavaFXWindowsListener {
 
+    private final static Logger logger = LoggerFactory.getLogger(MainWindowController.class);
+    
     private final static int THREADS_POOL_SIZE = 4;
     private final static Mode DEFAULT_BLOCK_ENCRYPTION_MODE = Mode.ECB;
     private final static Algorithm DEFAULT_ENCRYPTION_ALGORITHM = Algorithm.DES;
@@ -198,7 +204,7 @@ public class MainWindowController implements JavaFXWindowsListener {
                 Desktop.getDesktop().open(file);
             } catch (IOException e) {
                 e.printStackTrace();
-                Logger.err(e);
+                logger.log(Level.SEVERE, e.getMessage());
             }
         }
 
@@ -367,9 +373,9 @@ public class MainWindowController implements JavaFXWindowsListener {
             throw new UnexpectedWindowEventCall("Class name: " + callerClassName);
     }
 
-    private void writeToLogLabel(String log) {
-        this.logLabel.setText(log);
-        Logger.info(log);
+    private void writeToLogLabel(String singleLog) {
+        this.logLabel.setText(singleLog);
+        logger.log(Level.INFO, singleLog);
     }
 
 
@@ -389,5 +395,15 @@ public class MainWindowController implements JavaFXWindowsListener {
     void loginUser(UserCredentials userCredentials) {
         this.userCredentials = userCredentials;
         writeToLogLabel("Logged in as user: " + userCredentials.getUsername());
+    }
+    
+    @Override
+    public void closeWindow() {
+    
+    }
+    
+    @Override
+    public void setParentController(JavaFXController parentController) {
+        throw new NotImplementedException("This controlled can't have parent controllers.");
     }
 }

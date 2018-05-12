@@ -103,6 +103,7 @@ public class FileCipherJob extends Task {
         else
             cipher.init(cipherMode.cipherMode, secretKey, initVector);
 
+        
         try (InputStream is = new FileInputStream(source.getFile());
              CipherOutputStream os = new CipherOutputStream(new FileOutputStream(destination.getFile()), cipher)) {
             int totalSize = is.available();

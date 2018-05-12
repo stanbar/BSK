@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="414.0" maxWidth="340.0" minHeight="240.0" minWidth="315.0" prefHeight="294.0" prefWidth="315.0" styleClass="main-pane" stylesheets="@../css/RegisterWindow.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.milbar.gui.RegisterWindowController">
+    <children>
+        <Label layoutX="94.0" layoutY="21.0" prefHeight="62.0" prefWidth="210.0" stylesheets="@../css/RegisterWindow.css" text="Rejestracja" textAlignment="CENTER">
+            <font>
+                <Font name="Times New Roman" size="28.0" />
+            </font></Label>
+        <TextField fx:id="userNameField" layoutX="98.0" layoutY="97.0" onAction="#registerButtonClicked" onKeyReleased="#userNameEntered" promptText="Nazwa użytkownika" styleClass="text-field" stylesheets="@../css/RegisterWindow.css" />
+        <PasswordField fx:id="passwordField" layoutX="98.0" layoutY="137.0" onAction="#registerButtonClicked" onKeyReleased="#passwordEntered" promptText="Hasło" styleClass="text-field" />
+        <PasswordField fx:id="passwordFieldRepeat" layoutX="98.0" layoutY="176.0" onAction="#registerButtonClicked" onKeyReleased="#passwordRepeatEntered" promptText="Powtórz hasło" styleClass="password-repeat" />
+        <Button layoutX="159.0" layoutY="232.0" mnemonicParsing="false" onAction="#registerButtonClicked" prefHeight="30.0" prefWidth="101.0" styleClass="button" stylesheets="@../css/RegisterWindow.css" text="Zarejestruj" />
+        <Button layoutX="67.0" layoutY="232.0" mnemonicParsing="false" onAction="#cancelButtonClicked" prefHeight="30.0" prefWidth="77.0" styleClass="button" stylesheets="@../css/RegisterWindow.css" text="Anuluj" />
+        <Label fx:id="errorLabel" layoutX="70.0" layoutY="207.0" prefHeight="17.0" prefWidth="177.0" styleClass="error-label" stylesheets="@../css/LoginWindow.css" textAlignment="CENTER" textFill="#ff5300" />
+        <ImageView fitHeight="30.0" fitWidth="34.0" layoutX="67.0" layoutY="97.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@../images/login.png" />
+        </ImageView>
+        <ImageView fitHeight="30.0" fitWidth="34.0" layoutX="67.0" layoutY="137.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@../images/password.png" />
+        </ImageView>
+
+    </children>
+</AnchorPane>

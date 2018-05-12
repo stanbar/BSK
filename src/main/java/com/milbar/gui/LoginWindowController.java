@@ -1,5 +1,6 @@
 package com.milbar.gui;
 
+import com.milbar.gui.abstracts.factories.LoggerFactory;
 import com.milbar.logic.exceptions.LoginException;
 import com.milbar.logic.login.LoginManager;
 import com.milbar.logic.login.UserCredentials;
@@ -9,12 +10,18 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class LoginWindowController extends JavaFXController {
+    
+    private static Logger log = LoggerFactory.getLogger(LoginWindowController.class);
+    
     
     private MainWindowController parentController;
     private String username, password;
     private Stage stage;
-    private boolean loginCancelled = false;
+    private boolean loginCancelled = false, loginAllowed = true;
     private LoginManager loginManager = new LoginManager();
     
     @FXML
@@ -24,16 +31,23 @@ public class LoginWindowController extends JavaFXController {
     private PasswordField passwordField;
     
     @FXML
+    public PasswordField passwordFieldRepeat;
+    
+    @FXML
     private Label errorLabel;
     
     @FXML
     public void userNameEntered() {
         username = userNameField.getText();
+        log.log(Level.INFO, "User entered username {0}", username);
     }
     
     @FXML
     public void passwordEntered() {
         password = passwordField.getText();
+        
+        //todo delete this on release
+        log.log(Level.INFO, "User entered password {0}", password);
     }
     
     @FXML
@@ -44,26 +58,52 @@ public class LoginWindowController extends JavaFXController {
     
     @FXML
     synchronized public void loginButtonClicked() {
+        if (!isLoginAllowed()) {
+            errorLabel.setText("Logging in is blocked right now.");
+            return;
+        }
         refreshInputData();
         if (areCredentialsEntered()) {
             try {
-                UserCredentials userCredentials = loginManager.getUserCredentials(username, password);
-                parentController.loginUser(userCredentials);
-                closeWindow();
+                handleUserLoginEvent();
             } catch (LoginException e) {
+                log.log(Level.SEVERE, e.getMessage());
                 errorLabel.setText(e.getMessage());
             }
-        }
-        else
+        } else
             errorLabel.setText("There are empty fields.");
+    }
+    
+    private void handleUserLoginEvent() throws LoginException {
+        UserCredentials userCredentials = loginManager.getUserCredentials(username, password);
+        parentController.loginUser(userCredentials);
+        closeWindow();
+    }
+    
+    @FXML
+    public void registerButtonClicked() {
+        lockLogin();
+    }
+    
+    private void lockLogin() {
+        loginAllowed = false;
+    }
+    
+    private void unlockLogin() {
+        loginAllowed = true;
     }
     
     @Override
     public synchronized void closeWindow() {
         if (loginCancelled){
-            parentController.windowClosed(LoginWindow.class.getSimpleName());
+            parentController.windowClosed(LoginWindow.class.getCanonicalName());
         }
         stage.close();
+    }
+    
+    @Override
+    public void setParentController(JavaFXController parentController) {
+        this.parentController = (MainWindowController)parentController;
     }
     
     private boolean areCredentialsEntered() {
@@ -83,7 +123,11 @@ public class LoginWindowController extends JavaFXController {
         this.stage = stage;
     }
     
-    void setParentController(MainWindowController parentController) {
-        this.parentController = parentController;
+    public boolean isLoginAllowed() {
+        return loginAllowed;
+    }
+    
+    public void registerNewUser(String username, String password) {
+        parentController.registerNewUser()
     }
 }
