@@ -20,11 +20,7 @@ public class CredentialsManager {
     private static final int HASH_ITERATIONS = 100;
     private static final int HASH_LENGTH_IN_BYTES = 128;
     
-    /**
-     * Returns a random salt to be used to hash a password.
-     *
-     * @return 16 bytes random salt
-     */
+    
     public byte[] getSalt() {
         byte[] salt = new byte[16];
         random.nextBytes(salt);
@@ -49,16 +45,16 @@ public class CredentialsManager {
     }
     
     public boolean validatePassword(final String password, final byte[] salt, final byte[] hash) {
-        byte[] generatedHash;
-        
         try {
-            generatedHash = getHash(password, salt);
-            if (hashEquals(generatedHash, hash)) {
-            
-            }
+            byte[] generatedHash = getHash(password, salt);
+            if (hashEquals(generatedHash, hash))
+                return true;
+            else
+                return false;
         } catch (ImplementationError e) {
             e.printStackTrace();
         }
+        return false;
     }
     
     private boolean hashEquals(byte[] left, byte[] right) {

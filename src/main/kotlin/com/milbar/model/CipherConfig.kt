@@ -13,5 +13,5 @@ data class CipherConfig(val secretKeyBytes: ByteArray,
     val secretKeyHex: String = DatatypeConverter.printHexBinary(secretKeyBytes)
     val initialVectorHex: String = DatatypeConverter.printHexBinary(initialVectorBytes)
 
-    fun getSecretKey() : SecretKey = SecretKeySpec(secretKeyBytes, algorithm.name)
+    fun getSecretKey() : SecretKey = SecretKeySpec(secretKeyBytes, algorithm.algorithmName)
 }
