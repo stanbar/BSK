@@ -89,7 +89,7 @@ public class FileCipherJob extends Task {
     }
 
     private void cipher(FileAndExtension source, FileAndExtension destination, CipherMode cipherMode) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException {
-        Cipher cipher = Cipher.getInstance(algorithm.name + "/" + mode.name() + "/PKCS5Padding");
+        Cipher cipher = Cipher.getInstance(algorithm.algorithmName + "/" + mode.name() + "/PKCS5Padding");
 
         IvParameterSpec initVector = new IvParameterSpec(initVectorBytes);
 
