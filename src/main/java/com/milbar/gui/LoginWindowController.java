@@ -128,6 +128,6 @@ public class LoginWindowController extends JavaFXController {
     }
     
     public void registerNewUser(String username, String password) {
-        parentController.registerNewUser()
+        parentController.registerNewUser();
     }
 }

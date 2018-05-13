@@ -16,10 +16,10 @@ public enum Algorithm {
 
     public int initVectorSize;
     public int keySize;
-    public String name;
+    public String algorithmName;
 
-    Algorithm(String name, int keySize, int initVectorSize) {
-        this.name = name;
+    Algorithm(String algorithmName, int keySize, int initVectorSize) {
+        this.algorithmName = algorithmName;
         this.keySize = keySize;
         this.initVectorSize = initVectorSize;
     }

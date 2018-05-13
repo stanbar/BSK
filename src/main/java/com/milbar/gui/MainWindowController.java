@@ -25,7 +25,6 @@ import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import jdk.jshell.spi.ExecutionControl;
 import org.apache.commons.lang.NotImplementedException;
 
 import javax.crypto.KeyGenerator;
@@ -242,7 +241,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     }
 
     private void refreshPrivateKey() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance(selectedEncryptionAlgorithm.name);
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(selectedEncryptionAlgorithm.algorithmName);
         keyGenerator.init(selectedEncryptionAlgorithm.keySize);
 
         privateKeyObservable.setValue(keyGenerator.generateKey());
@@ -406,4 +405,5 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     public void setParentController(JavaFXController parentController) {
         throw new NotImplementedException("This controlled can't have parent controllers.");
     }
+
 }

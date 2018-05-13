@@ -12,4 +12,5 @@ public abstract class JavaFXController {
     public abstract void closeWindow();
     
     public abstract void setParentController(JavaFXController parentController);
+
 }
