@@ -1,10 +1,10 @@
+import com.milbar.Utils;
 import kotlin.text.Charsets;
 import org.junit.Before;
 import org.junit.Test;
 
 import javax.crypto.*;
 import javax.crypto.spec.DESKeySpec;
-import javax.xml.bind.DatatypeConverter;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -51,9 +51,9 @@ public class BruteForceJava {
         byte[] decrypted = cipher.doFinal(encrypted);
         System.out.printf("Decrypted = %s%n", new String(decrypted));
 
-        System.out.println("Key encoded: " + DatatypeConverter.printHexBinary(key.getEncoded()));
-        System.out.println("Key in bytes: " + DatatypeConverter.printHexBinary(keyBytes));
-        assertEquals(DatatypeConverter.printHexBinary(keyBytes), DatatypeConverter.printHexBinary(key.getEncoded()));
+        System.out.println("Key encoded: " + Utils.byteArrayToHex(key.getEncoded()));
+        System.out.println("Key in bytes: " + Utils.byteArrayToHex(keyBytes));
+        assertEquals(Utils.byteArrayToHex(keyBytes), Utils.byteArrayToHex(key.getEncoded()));
 
 
         byte[] bytes = new byte[8];
@@ -76,7 +76,7 @@ public class BruteForceJava {
                                         setValueAndParityBit((byte) p, bytes, 7);
 
                                         if (iteration == 1 || iteration == 2 || iteration == 3 || iteration % 500000 == 0) {
-                                            System.out.println("Iteration: " + iteration + " bytes: " + DatatypeConverter.printHexBinary(bytes));
+                                            System.out.println("Iteration: " + iteration + " bytes: " + Utils.byteArrayToHex(bytes));
                                             String s1 = String.format("Binary:%8s_%8s_%8s_%8s",
                                                     Integer.toBinaryString(bytes[4] & 0xFF),
                                                     Integer.toBinaryString(bytes[5] & 0xFF),
@@ -145,6 +145,6 @@ public class BruteForceJava {
         cipher.init(Cipher.ENCRYPT_MODE, candidateKey);
         byte[] decrypted = cipher.doFinal(encrypted);
         if (Arrays.equals(decrypted, plainText))
-            throw new RuntimeException(String.format("Found key: %s", DatatypeConverter.printHexBinary(candidateKey.getEncoded())));
+            throw new RuntimeException(String.format("Found key: %s", Utils.byteArrayToHex(candidateKey.getEncoded())));
     }
 }

@@ -1,5 +1,6 @@
 package com.milbar.logic;
 
+import com.milbar.Utils;
 import com.milbar.logic.encryption.Algorithm;
 import com.milbar.logic.encryption.Mode;
 import com.milbar.logic.exceptions.IllegalFileNameException;
@@ -12,7 +13,6 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
-import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -95,8 +95,8 @@ public class FileCipherJob extends Task {
 
         //TODO security leak, remove this log
         System.out.printf("Using key: %s and InitVector: %s%n",
-                DatatypeConverter.printHexBinary(secretKey.getEncoded()),
-                DatatypeConverter.printHexBinary(initVectorBytes));
+                Utils.byteArrayToHex(secretKey.getEncoded()),
+                Utils.byteArrayToHex(initVectorBytes));
 
         if (mode == Mode.ECB)
             cipher.init(cipherMode.cipherMode, secretKey);

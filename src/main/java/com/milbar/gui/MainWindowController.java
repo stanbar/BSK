@@ -1,6 +1,7 @@
 package com.milbar.gui;
 
 import com.milbar.ConfigManager;
+import com.milbar.Utils;
 import com.milbar.gui.abstracts.factories.LoggerFactory;
 import com.milbar.logic.FileCipherJob;
 import com.milbar.logic.encryption.Algorithm;
@@ -28,7 +29,6 @@ import javafx.stage.Stage;
 import org.apache.commons.lang.NotImplementedException;
 
 import javax.crypto.KeyGenerator;
-import javax.xml.bind.DatatypeConverter;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
@@ -135,11 +135,11 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         initializeFileChooser();
         refreshTable();
         privateKeyObservable.addListener((observable, oldValue, newValue) ->
-                labelPrivateKey.setText(DatatypeConverter.printHexBinary(newValue.getEncoded())));
+                labelPrivateKey.setText(Utils.byteArrayToHex(newValue.getEncoded())));
         refreshPrivateKey();
 
         initialVectorObservable.addListener((observable, oldValue, newValue) ->
-                labelInitialVector.setText(DatatypeConverter.printHexBinary(newValue)));
+                labelInitialVector.setText(Utils.byteArrayToHex(newValue)));
         refreshInitialVector();
     }
 
