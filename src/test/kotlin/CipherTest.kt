@@ -49,7 +49,7 @@ class CipherTest {
     fun testKeyGeneration() {
         val keyGenerator: KeyGenerator = KeyGenerator.getInstance("DES")
         val secretKey = keyGenerator.generateKey()
-        println("Key: ${DatatypeConverter.printHexBinary(secretKey.encoded)}")
+        println("Key: ${Utils.byteArrayToHex(secretKey.encoded)}")
     }
 
     /**
@@ -279,7 +279,7 @@ class CipherTest {
 
         val initVector = IvParameterSpec(initVectorBytes)
 
-        println("Using key: ${DatatypeConverter.printHexBinary(secretKey.encoded)} and InitVector: ${DatatypeConverter.printHexBinary(initVectorBytes)}")
+        println("Using key: ${Utils.byteArrayToHex(secretKey.encoded)} and InitVector: ${Utils.byteArrayToHex(initVectorBytes)}")
 
         if (mode == Mode.ECB)
             cipher.init(Cipher.ENCRYPT_MODE, secretKey)

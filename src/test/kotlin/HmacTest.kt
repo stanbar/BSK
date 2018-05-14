@@ -20,7 +20,7 @@ class HmacTest {
         mac.init(key)
         val digest = mac.doFinal(data)
 
-        assertEquals(DatatypeConverter.printHexBinary(digest), "de262839aa0bafea75d0d43f05cc433952dc2b3c".toUpperCase())
+        assertEquals(Utils.byteArrayToHex(digest), "de262839aa0bafea75d0d43f05cc433952dc2b3c".toUpperCase())
 
     }
 
@@ -33,7 +33,7 @@ class HmacTest {
         mac.init(key)
         val digest = mac.doFinal(data)
 
-        assertEquals(DatatypeConverter.printHexBinary(digest), "405fdc5c2054a4b75c4f7d285b0c8b6cc82708cb8d5f67d374bc382de7af214f".toUpperCase())
+        assertEquals(Utils.byteArrayToHex(digest), "405fdc5c2054a4b75c4f7d285b0c8b6cc82708cb8d5f67d374bc382de7af214f".toUpperCase())
 
     }
 
@@ -46,7 +46,7 @@ class HmacTest {
         mac.init(key)
         val digest = mac.doFinal(data)
 
-        assertEquals(DatatypeConverter.printHexBinary(digest), "e5c0c66988dbabcc35c9bb234c74095d".toUpperCase())
+        assertEquals(Utils.byteArrayToHex(digest), "e5c0c66988dbabcc35c9bb234c74095d".toUpperCase())
     }
 
     @Test
@@ -61,7 +61,7 @@ class HmacTest {
             digest = mac.doFinal(data)
         }
 
-        println(DatatypeConverter.printHexBinary(digest))
+        println(Utils.byteArrayToHex(digest))
         println("MD5 Seconds ${time / 1000.0 }")
 
 
@@ -79,7 +79,7 @@ class HmacTest {
             digest = mac.doFinal(data)
         }
 
-        println(DatatypeConverter.printHexBinary(digest))
+        println(Utils.byteArrayToHex(digest))
         println("SHA1 Seconds ${time / 1000.0}")
     }
 }
