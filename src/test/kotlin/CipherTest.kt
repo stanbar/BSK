@@ -1,3 +1,4 @@
+import com.milbar.Utils
 import com.milbar.logic.FileCipherJob
 import com.milbar.logic.encryption.Algorithm
 import com.milbar.logic.encryption.Mode
@@ -15,7 +16,6 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
-import javax.xml.bind.DatatypeConverter
 
 
 class CipherTest {
