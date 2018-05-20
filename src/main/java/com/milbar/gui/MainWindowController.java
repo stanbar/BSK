@@ -8,7 +8,7 @@ import com.milbar.logic.encryption.Algorithm;
 import com.milbar.logic.encryption.Mode;
 import com.milbar.logic.exceptions.IllegalEventSourceException;
 import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
-import com.milbar.logic.login.UserCredentials;
+import com.milbar.logic.login.wrappers.UserCredentials;
 import com.milbar.model.CipherConfig;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;

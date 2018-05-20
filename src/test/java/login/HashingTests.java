@@ -5,6 +5,8 @@ import com.milbar.logic.login.CredentialsManager;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.fail;
 
@@ -69,8 +71,17 @@ public class HashingTests {
     }
     
     @Test(timeout = 1000)
+    //@Test
     public void WhenGettingSalt_SaltsDoesNotRepeat() {
-    
+        int setSize = 100000;
+        Integer hash;
+        Set<Integer> saltsSet = new HashSet<>(setSize);
+        
+        for (int i = 0; i < setSize; i++) {
+            hash = Arrays.hashCode(credentialsManager.getSalt());
+            if (!saltsSet.add(hash))
+                fail("Duplicate salt after " + i + " iterations.");
+        }
     }
     
 }

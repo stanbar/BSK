@@ -2,6 +2,7 @@ package com.milbar.logic.login;
 
 import com.milbar.gui.abstracts.factories.LoggerFactory;
 import com.milbar.logic.exceptions.ImplementationError;
+import com.milbar.logic.login.wrappers.SessionToken;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
 
 public class CredentialsManager {
     
-    Logger logger = LoggerFactory.getLogger(CredentialsManager.class);
+    private Logger logger = LoggerFactory.getLogger(CredentialsManager.class);
     
     private final Random random = new SecureRandom();
     private static final int HASH_ITERATIONS = 100;
@@ -25,6 +26,11 @@ public class CredentialsManager {
         byte[] salt = new byte[16];
         random.nextBytes(salt);
         return salt;
+    }
+    
+    public SessionToken getRandomSessionToken(final String username) {
+        byte[] token = getSalt();
+        return new SessionToken(username, token);
     }
     
     public byte[] getHash(final String password, final byte[] salt) throws ImplementationError {
@@ -57,7 +63,7 @@ public class CredentialsManager {
         return false;
     }
     
-    private boolean hashEquals(byte[] left, byte[] right) {
+    private boolean hashEquals(final byte[] left, final byte[] right) {
         if (left.length != right.length)
             return false;
         

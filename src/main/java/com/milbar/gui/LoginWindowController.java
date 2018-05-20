@@ -3,7 +3,7 @@ package com.milbar.gui;
 import com.milbar.gui.abstracts.factories.LoggerFactory;
 import com.milbar.logic.exceptions.LoginException;
 import com.milbar.logic.login.LoginManager;
-import com.milbar.logic.login.UserCredentials;
+import com.milbar.logic.login.wrappers.UserCredentials;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -75,9 +75,10 @@ public class LoginWindowController extends JavaFXController {
     }
     
     private void handleUserLoginEvent() throws LoginException {
-        UserCredentials userCredentials = loginManager.getUserCredentials(username, password);
-        parentController.loginUser(userCredentials);
-        closeWindow();
+        //todo commented outdated code, need to update to a new login manager
+//        UserCredentials userCredentials = loginManager.getUserCredentials(username, password);
+//        parentController.loginUser(userCredentials);
+//        closeWindow();
     }
     
     @FXML
