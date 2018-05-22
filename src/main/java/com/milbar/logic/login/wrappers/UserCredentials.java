@@ -1,8 +1,6 @@
 package com.milbar.logic.login.wrappers;
 
-public class UserCredentials {
-    
-    //todo implement safe password storing method
+public class UserCredentials implements Destroyable {
     
     private String username;
     private byte[] hashedPassword;

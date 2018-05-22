@@ -16,12 +16,14 @@ public class SerializedDataReader <K, V> {
     
     private Map<K, V> serializedCollection;
     private Path pathToSerializedData;
+    private boolean isCollectionUpToDate = false;
     
     public SerializedDataReader(Path path) {
          this.pathToSerializedData = path;
      }
     
     public void readFromFile() throws ReadingSerializedFileException {
+        isCollectionUpToDate = true;
         try (FileInputStream fileStream = new FileInputStream(pathToSerializedData.toFile());
              ObjectInputStream objectStream = new ObjectInputStream(fileStream)) {
             
@@ -34,9 +36,11 @@ public class SerializedDataReader <K, V> {
     }
     
     public void saveToFile() throws WritingSerializedFileException {
+        File file = pathToSerializedData.toFile();
         try (FileOutputStream fileStream = new FileOutputStream(pathToSerializedData.toFile());
              ObjectOutputStream objectStream = new ObjectOutputStream(fileStream)) {
             
+            file.getParentFile().mkdirs();
             objectStream.writeObject(serializedCollection);
             
         } catch (IOException e) {
@@ -46,15 +50,29 @@ public class SerializedDataReader <K, V> {
     }
     
     public Map<K, V> getCollection() {
-         return serializedCollection;
+        if (!isCollectionUpToDate) {
+            try {
+                readFromFile();
+            } catch (ReadingSerializedFileException ignore) {
+            
+            }
+        }
+        return serializedCollection;
     }
     
-    public boolean updateCollection(K key, V value) {
-         return serializedCollection.put(key, value) != null;
+    public boolean updateCollection(K key, V value) throws WritingSerializedFileException {
+        V putResult = serializedCollection.put(key, value);
+        if (putResult != null) {
+            saveToFile();
+            return true;
+        }
+        else
+            return false;
     }
     
-    public void updateCollection(Map<K, V> newCollection) {
+    public void updateCollection(Map<K, V> newCollection) throws WritingSerializedFileException {
          serializedCollection = newCollection;
+         saveToFile();
     }
     
     public V getValue(K key) {
@@ -65,7 +83,12 @@ public class SerializedDataReader <K, V> {
          return serializedCollection.containsKey(key);
     }
     
-    public boolean removeItem(K key) {
-        return serializedCollection.remove(key) != null;
+    public boolean removeItem(K key) throws WritingSerializedFileException {
+        if (serializedCollection.remove(key) != null) {
+            saveToFile();
+            return true;
+        }
+        else
+            return false;
     }
 }

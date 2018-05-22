@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class RegisterWindow extends JavaFXWindow {
     
-    public RegisterWindow(MainWindowController parentController) throws IOException {
+    public RegisterWindow(LoginWindowController parentController) throws IOException {
         super(parentController);
         
         fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource(

@@ -1,19 +1,40 @@
 package com.milbar.logic.login.wrappers;
 
-import java.util.Arrays;
+import com.milbar.gui.configuration.ApplicationConfiguration;
 
-public class SessionToken {
+import java.util.Arrays;
+import java.util.Date;
+
+public class SessionToken implements Destroyable {
+    
+    private final static long SESSION_LENGTH = ApplicationConfiguration.getSessionLength();
     
     private String username;
     private byte[] token;
+    private Date sessionValidUntil;
     
     public SessionToken(String username, byte[] token) {
         this.username = username;
         this.token = token;
+        refresh();
     }
     
     public byte[] getToken() {
         return token;
+    }
+    
+    public String getUsername() {
+        return username;
+    }
+    
+    public void refresh() {
+        Date currentDate = new Date();
+        sessionValidUntil = new Date(currentDate.getTime() + SESSION_LENGTH);
+    }
+    
+    public boolean isSessionValid() {
+        Date currentDate = new Date();
+        return currentDate.getTime() <= sessionValidUntil.getTime();
     }
     
     @Override
@@ -38,4 +59,8 @@ public class SessionToken {
         return result;
     }
     
+    public void destroy() {
+        this.username = null;
+        this.token = null;
+    }
 }

@@ -7,8 +7,7 @@ import com.milbar.logic.login.wrappers.SessionToken;
 import com.milbar.logic.login.wrappers.UserCredentials;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,20 +17,24 @@ public class UsersManager {
     
     private SerializedDataReader<String, UserCredentials> usersCollection;
     private CredentialsManager credentialsManager = new CredentialsManager();
-    private byte[] loginToken;
     
     UsersManager(Path pathToUsersData) {
         usersCollection = new SerializedDataReader<>(pathToUsersData);
         try {
             usersCollection.readFromFile();
         } catch (ReadingSerializedFileException e) {
-            Map<String, UserCredentials> usersList = new HashMap<>();
-            usersCollection.updateCollection(usersList);
-            logger.log(Level.WARNING, "Failed to load users data from file. Creating a new, empty collection.");
+            try {
+                Map<String, UserCredentials> usersList = new HashMap<>();
+                usersCollection.updateCollection(usersList);
+                logger.log(Level.WARNING, "Failed to load users data from file. Creating a new, empty collection.");
+            } catch (WritingSerializedFileException writeException) {
+                writeException.printStackTrace();
+                logger.log(Level.SEVERE, "Failed to update users collection.");
+            }
         }
     }
     
-    public boolean registerUser(String username, String password) throws UserAlreadyExists {
+    boolean registerUser(String username, String password) throws UserAlreadyExists {
         if (usersCollection.keyExists(username))
             throw new UserAlreadyExists("User with name: " + username + " already exists.");
         
@@ -39,16 +42,17 @@ public class UsersManager {
         byte[] hashedPassword;
         try {
             hashedPassword = credentialsManager.getHash(password, salt);
-        } catch (ImplementationError e) {
+            UserCredentials newUser = new UserCredentials(username, hashedPassword, salt);
+            usersCollection.updateCollection(username, newUser);
+        } catch (ImplementationError | WritingSerializedFileException e) {
             e.printStackTrace();
             return false;
         }
-        UserCredentials newUser = new UserCredentials(username, hashedPassword, salt);
-        usersCollection.updateCollection(username, newUser);
+    
         return true;
     }
     
-    public boolean removeUser(String username, String password) throws UserDoesNotExist {
+    boolean removeUser(String username, String password) throws UserDoesNotExist {
         UserCredentials usersCredentials = usersCollection.getValue(username);
         if (usersCredentials == null)
             throw new UserDoesNotExist("Failed to remove user, because there is not user with name: " + username);
@@ -56,14 +60,19 @@ public class UsersManager {
         byte[] salt = usersCredentials.getSalt();
         byte[] hashedPassword = usersCredentials.getHashedPassword();
         if (credentialsManager.validatePassword(password, salt, hashedPassword)) {
-            usersCollection.removeItem(username);
+            try {
+                usersCollection.removeItem(username);
+            } catch (WritingSerializedFileException e) {
+                e.printStackTrace();
+                return false;
+            }
             return true;
         }
         else
             return false;
     }
 
-    public SessionToken loginUser(String username, String password) throws UserDoesNotExist, UsersPasswordNotValid {
+    SessionToken loginUser(String username, String password) throws UserDoesNotExist, UsersPasswordNotValid {
         UserCredentials userCredentials = usersCollection.getValue(username);
         if (usersCollection == null)
             throw new UserDoesNotExist("User with name: " + username + " does not exists.");
@@ -74,5 +83,10 @@ public class UsersManager {
             return credentialsManager.getRandomSessionToken(username);
         else
             throw new UsersPasswordNotValid("Login operation for " + username + " failed. Given password is wrong.");
+    }
+    
+    public List<String> getUsersList() {
+        Map<String, UserCredentials> userCredentials = usersCollection.getCollection();
+        return new ArrayList<>(userCredentials.keySet());
     }
 }

@@ -8,7 +8,7 @@ import com.milbar.logic.encryption.Algorithm;
 import com.milbar.logic.encryption.Mode;
 import com.milbar.logic.exceptions.IllegalEventSourceException;
 import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
-import com.milbar.logic.login.wrappers.UserCredentials;
+import com.milbar.logic.login.wrappers.SessionToken;
 import com.milbar.model.CipherConfig;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,7 +23,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ProgressBarTableCell;
-import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.lang.NotImplementedException;
@@ -44,7 +43,7 @@ import java.util.logging.Logger;
 
 public class MainWindowController extends JavaFXController implements JavaFXWindowsListener {
 
-    private final static Logger logger = LoggerFactory.getLogger(MainWindowController.class);
+    private final static Logger log = LoggerFactory.getLogger(MainWindowController.class);
     
     private final static int THREADS_POOL_SIZE = 4;
     private final static Mode DEFAULT_BLOCK_ENCRYPTION_MODE = Mode.ECB;
@@ -60,7 +59,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     public RadioButton radioButtonCFB;
     @FXML
     public RadioButton radioButtonOFB;
-    private Map<Mode, RadioButton> modeToggleMap = new HashMap<Mode, RadioButton>() {{
+    private Map<Mode, RadioButton> modeToggleMap = new HashMap<>() {{
         Platform.runLater(() -> {
             put(Mode.ECB, radioButtonECB);
             put(Mode.CBC, radioButtonCBC);
@@ -84,7 +83,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     public RadioButton radioButtonAES;
     @FXML
     public RadioButton radioButtonBlowfish;
-    private Map<Algorithm, Toggle> algorithmToggleMap = new HashMap<Algorithm, Toggle>() {{
+    private Map<Algorithm, Toggle> algorithmToggleMap = new HashMap<>() {{
         Platform.runLater(() -> {
             put(Algorithm.AES, radioButtonAES);
             put(Algorithm.DES, radioButtonDES);
@@ -105,29 +104,26 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     private int filesSelectedAmount = -1;
     private FileChooser fileChooser = new FileChooser();
     private Set<String> openedWindows = new HashSet<>();
-    private LoginWindow loginWindow;
-    private UserCredentials userCredentials;
+    private SessionToken sessionToken;
     private final SimpleObjectProperty<Key> privateKeyObservable = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<byte[]> initialVectorObservable = new SimpleObjectProperty<>();
 
 
     @FXML
-    TableColumn<FileCipherJob, String> imageNameColumn;
+    private TableColumn<FileCipherJob, String> imageNameColumn;
     @FXML
-    TableColumn<FileCipherJob, Double> progressColumn;
+    private TableColumn<FileCipherJob, Double> progressColumn;
     @FXML
-    TableColumn<FileCipherJob, String> statusColumn;
+    private TableColumn<FileCipherJob, String> statusColumn;
     @FXML
-    TableView<FileCipherJob> filesTable;
+    private TableView<FileCipherJob> filesTable;
 
     @FXML
-    Pane mainPane;
+    private Label logLabel;
     @FXML
-    Label logLabel;
+    private Label labelInitialVector;
     @FXML
-    Label labelInitialVector;
-    @FXML
-    Label labelPrivateKey;
+    private Label labelPrivateKey;
 
 
     @FXML
@@ -203,7 +199,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
                 Desktop.getDesktop().open(file);
             } catch (IOException e) {
                 e.printStackTrace();
-                logger.log(Level.SEVERE, e.getMessage());
+                log.log(Level.SEVERE, e.getMessage());
             }
         }
 
@@ -285,7 +281,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     public void loginMenuBarClicked() {
         if (openedWindows.add(LoginWindow.class.getSimpleName())) {
             try {
-                loginWindow = new LoginWindow(this);
+                LoginWindow loginWindow = new LoginWindow(this);
             } catch (IOException e) {
                 e.printStackTrace();
                 writeToLogLabel("Failed to open login window.");
@@ -301,8 +297,8 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     }
 
     private void logoutCurrentUser() {
-        userCredentials.destroy();
-        userCredentials = null;
+        sessionToken.destroy();
+        sessionToken = null;
         writeToLogLabel("Successfully logged out.");
     }
 
@@ -374,7 +370,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
 
     private void writeToLogLabel(String singleLog) {
         this.logLabel.setText(singleLog);
-        logger.log(Level.INFO, singleLog);
+        log.log(Level.INFO, singleLog);
     }
 
 
@@ -391,9 +387,9 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         }
     }
 
-    void loginUser(UserCredentials userCredentials) {
-        this.userCredentials = userCredentials;
-        writeToLogLabel("Logged in as user: " + userCredentials.getUsername());
+    void loginUser(SessionToken sessionToken) {
+        this.sessionToken = sessionToken;
+        writeToLogLabel("Logged in as user: " + sessionToken.getUsername());
     }
     
     @Override
@@ -404,6 +400,12 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     @Override
     public void setParentController(JavaFXController parentController) {
         throw new NotImplementedException("This controlled can't have parent controllers.");
+    }
+    
+    public void setSessionToken(SessionToken sessionToken) {
+        this.sessionToken = sessionToken;
+        log.log(Level.INFO, "New session token, username: {0}, valid until: {1}.",
+                new Object[]{ sessionToken.getUsername(), Arrays.toString(sessionToken.getToken())});
     }
 
 }
