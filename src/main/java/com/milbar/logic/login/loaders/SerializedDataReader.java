@@ -37,10 +37,10 @@ public class SerializedDataReader <K, V> {
     
     public void saveToFile() throws WritingSerializedFileException {
         File file = pathToSerializedData.toFile();
+        file.getParentFile().mkdirs();
         try (FileOutputStream fileStream = new FileOutputStream(pathToSerializedData.toFile());
              ObjectOutputStream objectStream = new ObjectOutputStream(fileStream)) {
             
-            file.getParentFile().mkdirs();
             objectStream.writeObject(serializedCollection);
             
         } catch (IOException e) {
@@ -61,8 +61,8 @@ public class SerializedDataReader <K, V> {
     }
     
     public boolean updateCollection(K key, V value) throws WritingSerializedFileException {
-        V putResult = serializedCollection.put(key, value);
-        if (putResult != null) {
+        if (!serializedCollection.containsKey(key)) {
+            serializedCollection.put(key, value);
             saveToFile();
             return true;
         }

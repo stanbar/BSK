@@ -27,6 +27,10 @@ public class SessionToken implements Destroyable {
         return username;
     }
     
+    public Date getValidDate() {
+        return sessionValidUntil;
+    }
+    
     public void refresh() {
         Date currentDate = new Date();
         sessionValidUntil = new Date(currentDate.getTime() + SESSION_LENGTH);

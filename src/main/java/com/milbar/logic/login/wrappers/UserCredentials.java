@@ -1,6 +1,8 @@
 package com.milbar.logic.login.wrappers;
 
-public class UserCredentials implements Destroyable {
+import java.io.Serializable;
+
+public class UserCredentials implements Destroyable, Serializable {
     
     private String username;
     private byte[] hashedPassword;

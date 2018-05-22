@@ -26,8 +26,10 @@ public class LoginManager {
     }
     
     public void logout() {
-        usersSession.destroy();
-        usersSession = null;
+        if (usersSession != null) {
+            usersSession.destroy();
+            usersSession = null;
+        }
     }
     
     public void register(String username, String password) throws RegisterException {

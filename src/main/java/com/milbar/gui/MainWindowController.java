@@ -279,7 +279,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
 
     @FXML
     public void loginMenuBarClicked() {
-        if (openedWindows.add(LoginWindow.class.getSimpleName())) {
+        if (openedWindows.add(LoginWindow.class.getCanonicalName())) {
             try {
                 LoginWindow loginWindow = new LoginWindow(this);
             } catch (IOException e) {
@@ -297,9 +297,14 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     }
 
     private void logoutCurrentUser() {
-        sessionToken.destroy();
-        sessionToken = null;
-        writeToLogLabel("Successfully logged out.");
+        if (sessionToken != null) {
+            sessionToken.destroy();
+            sessionToken = null;
+            writeToLogLabel("Successfully logged out.");
+        }
+        else
+            writeToLogLabel("You are not logged in.");
+        
     }
 
     @FXML
@@ -405,7 +410,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     public void setSessionToken(SessionToken sessionToken) {
         this.sessionToken = sessionToken;
         log.log(Level.INFO, "New session token, username: {0}, valid until: {1}.",
-                new Object[]{ sessionToken.getUsername(), Arrays.toString(sessionToken.getToken())});
+                new Object[]{ sessionToken.getUsername(), sessionToken.getValidDate().toString() });
     }
 
 }

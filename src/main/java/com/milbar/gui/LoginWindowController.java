@@ -7,17 +7,16 @@ import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
 import com.milbar.logic.login.LoginManager;
 import com.milbar.logic.login.wrappers.SessionToken;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import org.controlsfx.control.textfield.TextFields;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,16 +24,17 @@ import java.util.logging.Logger;
 public class LoginWindowController extends JavaFXController implements JavaFXWindowsListener {
     
     private static Logger log = LoggerFactory.getLogger(LoginWindowController.class);
+    private static final int AUTOCOMPLETION_DELAY = 30;
     
     private MainWindowController parentController;
     private Set<String> openedWindows = new HashSet<>();
     
     private Stage stage;
-    private boolean loginCancelled = false, loginAllowed = true;
+    private boolean loginAllowed = true;
     private LoginManager loginManager = new LoginManager();
     
     @FXML
-    private TextField userNameField;
+    private TextField usernameField;
     
     @FXML
     private PasswordField passwordField;
@@ -46,8 +46,15 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     private Label errorLabel;
     
     @FXML
+    public void initialize() {
+        List<String> usersList = loginManager.getUsersList();
+        if (usersList != null && usersList.size() > 0)
+            TextFields.bindAutoCompletion(usernameField, usersList).setDelay(AUTOCOMPLETION_DELAY);
+    }
+    
+    @FXML
     public void userNameEntered() {
-        log.log(Level.INFO, "User entered username {0}", userNameField.getText());
+        log.log(Level.INFO, "User entered username {0}", usernameField.getText());
     }
     
     @FXML
@@ -58,7 +65,6 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     
     @FXML
     public void cancelButtonClicked() {
-        loginCancelled = true;
         closeWindow();
     }
     
@@ -71,7 +77,7 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
         refreshInputData();
         if (areCredentialsEntered()) {
             try {
-                handleUserLoginEvent(userNameField.getText(), passwordField.getText());
+                handleUserLoginEvent(usernameField.getText(), passwordField.getText());
             } catch (LoginException e) {
                 log.log(Level.SEVERE, e.getMessage());
                 errorLabel.setText(e.getMessage());
@@ -83,7 +89,6 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     private void handleUserLoginEvent(String username, String password) throws LoginException {
         SessionToken sessionToken = loginManager.login(username, password);
         parentController.setSessionToken(sessionToken);
-        loginCancelled = false;
         closeWindow();
     }
     
@@ -94,7 +99,7 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     }
     
     private void openRegisterWindow() {
-        if (openedWindows.add(RegisterWindow.class.getSimpleName())) {
+        if (openedWindows.add(RegisterWindow.class.getCanonicalName())) {
             try {
                 RegisterWindow registerWindow = new RegisterWindow(this);
             } catch (IOException e) {
@@ -121,8 +126,7 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     
     @Override
     public synchronized void closeWindow() {
-        if (loginCancelled)
-            parentController.windowClosed(LoginWindow.class.getCanonicalName());
+        parentController.windowClosed(LoginWindow.class.getCanonicalName());
         
         stage.close();
     }
@@ -133,7 +137,7 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     }
     
     private boolean areCredentialsEntered() {
-        return userNameField.getLength() > 0 && passwordField.getLength() > 0;
+        return usernameField.getLength() > 0 && passwordField.getLength() > 0;
     }
     
     private void refreshInputData() {

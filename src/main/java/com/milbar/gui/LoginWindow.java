@@ -17,7 +17,7 @@ public class LoginWindow extends JavaFXWindow {
                 "fxml/" + LoginWindow.class.getSimpleName() + ".fxml"));
         Parent root = fxmlLoader.load();
         controller = fxmlLoader.getController();
-        ((LoginWindowController)controller).setParentController(parentController);
+        controller.setParentController(parentController);
         stage = new Stage();
         stage.setTitle("");
         stage.initStyle(StageStyle.UNDECORATED);
