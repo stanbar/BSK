@@ -1,22 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ProgressBar?>
-<?import javafx.scene.control.RadioButton?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.util.ArrayList?>
 <BorderPane maxHeight="Infinity" maxWidth="Infinity" prefHeight="620.0" prefWidth="720.0"
             stylesheets="@../css/MainWindow.css" xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.milbar.gui.MainWindowController">
@@ -50,7 +37,7 @@
                     <items>
                         <AnchorPane minHeight="-Infinity" minWidth="0.0" prefHeight="23.0" prefWidth="100.0">
                             <children>
-                                <Label fx:id="logLabel" minHeight="-Infinity" prefHeight="21.0" prefWidth="877.0"
+                                <Label fx:id="labelWithLogs" minHeight="-Infinity" prefHeight="21.0" prefWidth="877.0"
                                        AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                        AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
                             </children>
@@ -117,7 +104,7 @@
                                 <VBox layoutX="545.0" layoutY="12.0" spacing="10">
                                     <Label text="Block encryption mode"/>
                                     <RadioButton fx:id="radioButtonECB" mnemonicParsing="false"
-                                                 onAction="#radioButtonSelected" selected="true"
+                                                 onAction="#blockModeSelected" selected="true"
                                                  stylesheets="@../css/MainWindow.css" text="ECB">
                                         <toggleGroup>
                                             <ToggleGroup fx:id="modeToggleGroup"/>
@@ -125,15 +112,15 @@
                                     </RadioButton>
 
                                     <RadioButton fx:id="radioButtonCBC" mnemonicParsing="false"
-                                                 onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css"
+                                                 onAction="#blockModeSelected" stylesheets="@../css/MainWindow.css"
                                                  text="CBC" toggleGroup="$modeToggleGroup"/>
 
                                     <RadioButton fx:id="radioButtonCFB" mnemonicParsing="false"
-                                                 onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css"
+                                                 onAction="#blockModeSelected" stylesheets="@../css/MainWindow.css"
                                                  text="CFB" toggleGroup="$modeToggleGroup"/>
 
                                     <RadioButton fx:id="radioButtonOFB" mnemonicParsing="false"
-                                                 onAction="#radioButtonSelected" stylesheets="@../css/MainWindow.css"
+                                                 onAction="#blockModeSelected" stylesheets="@../css/MainWindow.css"
                                                  text="OFB" toggleGroup="$modeToggleGroup"/>
                                 </VBox>
 
@@ -172,4 +159,25 @@
             </items>
         </SplitPane>
     </center>
+
+    <fx:define>
+        <ArrayList fx:id="encryptionModeList">
+            <fx:reference source="radioButtonAES"/>
+            <fx:reference source="radioButtonDES"/>
+            <fx:reference source="radioButtonDESeee"/>
+            <fx:reference source="radioButtonDESede2"/>
+            <fx:reference source="radioButtonDESede3"/>
+            <fx:reference source="radioButtonBlowfish"/>
+        </ArrayList>
+    </fx:define>
+
+    <fx:define>
+        <ArrayList fx:id="encryptionBlockTypeList">
+            <fx:reference source="radioButtonECB"/>
+            <fx:reference source="radioButtonCBC"/>
+            <fx:reference source="radioButtonCFB"/>
+            <fx:reference source="radioButtonOFB"/>
+        </ArrayList>
+    </fx:define>
+
 </BorderPane>

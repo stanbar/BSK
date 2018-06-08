@@ -3,6 +3,8 @@ package com.milbar.gui;
 import com.milbar.ConfigManager;
 import com.milbar.Utils;
 import com.milbar.gui.abstracts.factories.LoggerFactory;
+import com.milbar.gui.helpers.LogLabel;
+import com.milbar.gui.helpers.TogglesHelper;
 import com.milbar.logic.FileCipherJob;
 import com.milbar.logic.encryption.Algorithm;
 import com.milbar.logic.encryption.Mode;
@@ -10,7 +12,6 @@ import com.milbar.logic.exceptions.IllegalEventSourceException;
 import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
 import com.milbar.logic.login.wrappers.SessionToken;
 import com.milbar.model.CipherConfig;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -44,6 +45,7 @@ import java.util.logging.Logger;
 public class MainWindowController extends JavaFXController implements JavaFXWindowsListener {
 
     private final static Logger log = LoggerFactory.getLogger(MainWindowController.class);
+    private LogLabel logLabel;
     
     private final static int THREADS_POOL_SIZE = 4;
     private final static Mode DEFAULT_BLOCK_ENCRYPTION_MODE = Mode.ECB;
@@ -59,15 +61,11 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     public RadioButton radioButtonCFB;
     @FXML
     public RadioButton radioButtonOFB;
-    private Map<Mode, RadioButton> modeToggleMap = new HashMap<>() {{
-        Platform.runLater(() -> {
-            put(Mode.ECB, radioButtonECB);
-            put(Mode.CBC, radioButtonCBC);
-            put(Mode.CFB, radioButtonCFB);
-            put(Mode.OFB, radioButtonOFB);
-        });
-    }};
-
+    @FXML
+    public ArrayList<RadioButton> encryptionBlockTypeList;
+    
+    private Map<Mode, Toggle> modeToggleMap;
+    private Map<Toggle, Mode> toggleModeMap;
 
     @FXML
     public ToggleGroup algorithmToggleGroup;
@@ -83,17 +81,12 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     public RadioButton radioButtonAES;
     @FXML
     public RadioButton radioButtonBlowfish;
-    private Map<Algorithm, Toggle> algorithmToggleMap = new HashMap<>() {{
-        Platform.runLater(() -> {
-            put(Algorithm.AES, radioButtonAES);
-            put(Algorithm.DES, radioButtonDES);
-            put(Algorithm.DESeee, radioButtonDESeee);
-            put(Algorithm.DESede2, radioButtonDESede2);
-            put(Algorithm.DESede3, radioButtonDESede3);
-            put(Algorithm.Blowfish, radioButtonBlowfish);
-        });
-    }};
-
+    @FXML
+    private ArrayList<RadioButton> encryptionModeList;
+    
+    private Map<Algorithm, Toggle> algorithmToggleMap;
+    private Map<Toggle, Algorithm> toggleAlgorithmMap;
+    
 
     private ExecutorService executor = Executors.newFixedThreadPool(THREADS_POOL_SIZE);
     private ObservableList<FileCipherJob> tableElementsList = FXCollections.observableArrayList();
@@ -108,7 +101,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     private final SimpleObjectProperty<Key> privateKeyObservable = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<byte[]> initialVectorObservable = new SimpleObjectProperty<>();
 
-
     @FXML
     private TableColumn<FileCipherJob, String> imageNameColumn;
     @FXML
@@ -119,7 +111,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     private TableView<FileCipherJob> filesTable;
 
     @FXML
-    private Label logLabel;
+    private Label labelWithLogs;
     @FXML
     private Label labelInitialVector;
     @FXML
@@ -128,6 +120,14 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
 
     @FXML
     private void initialize() throws NoSuchAlgorithmException {
+        logLabel = new LogLabel(labelWithLogs, log);
+    
+        modeToggleMap = TogglesHelper.prepareModeToggleMap(encryptionBlockTypeList);
+        toggleModeMap = TogglesHelper.swapKeyValueMap(modeToggleMap);
+        
+        algorithmToggleMap = TogglesHelper.prepareAlgorithmToggleMap(encryptionModeList);
+        toggleAlgorithmMap = TogglesHelper.swapKeyValueMap(algorithmToggleMap);
+        
         initializeFileChooser();
         refreshTable();
         privateKeyObservable.addListener((observable, oldValue, newValue) ->
@@ -159,7 +159,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
 
         filesSelectedAmount = files.size();
         filesSelected = filesSelectedAmount > 0;
-        writeToLogLabel("Selected " + filesSelectedAmount + " files for encryption.");
+        logLabel.writeInfo("Selected " + filesSelectedAmount + " files for encryption.");
         createFileJobsList(FileCipherJob.CipherMode.ENCRYPT);
     }
 
@@ -167,17 +167,16 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     void encryptFilesButtonClicked() {
         createFileJobsList(FileCipherJob.CipherMode.ENCRYPT);
         if (filesSelected) {
-            writeToLogLabel("Starting encryption of " + filesSelectedAmount + " files.");
+            logLabel.writeInfo("Starting encryption of " + filesSelectedAmount + " files.");
             tableElementsList.forEach(task -> executor.submit(task));
         }
     }
-
 
     @FXML
     void decryptFilesButtonClicked() {
         createFileJobsList(FileCipherJob.CipherMode.DECRYPT);
         if (filesSelected) {
-            writeToLogLabel("Starting decryption of " + filesSelectedAmount + " files.");
+            logLabel.writeInfo("Starting decryption of " + filesSelectedAmount + " files.");
             tableElementsList.forEach(task -> executor.submit(task));
 
         }
@@ -284,10 +283,10 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
                 LoginWindow loginWindow = new LoginWindow(this);
             } catch (IOException e) {
                 e.printStackTrace();
-                writeToLogLabel("Failed to open login window.");
+                logLabel.writeError("Failed to open login window.");
             }
         } else {
-            writeToLogLabel("Login window is already opened!");
+            logLabel.writeWarning("Login window is already opened!");
         }
     }
 
@@ -300,85 +299,17 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         if (sessionToken != null) {
             sessionToken.destroy();
             sessionToken = null;
-            writeToLogLabel("Successfully logged out.");
+            logLabel.writeInfo("Successfully logged out.");
         }
         else
-            writeToLogLabel("You are not logged in.");
-        
+            logLabel.writeError("You are not logged in.");
     }
 
     @FXML
     public void showAboutMenuBarClicked() {
         openNewWindow("fxml/AboutWindow.fxml", "About");
     }
-
-    @FXML
-    public void radioButtonSelected(ActionEvent event) throws IllegalEventSourceException {
-        RadioButton rb = (RadioButton) event.getSource();
-
-        switch (rb.getId()) {
-            case "radioButtonECB":
-                selectedBlockEncryptionMode = Mode.ECB;
-                break;
-            case "radioButtonCBC":
-                selectedBlockEncryptionMode = Mode.CBC;
-                break;
-            case "radioButtonCFB":
-                selectedBlockEncryptionMode = Mode.CFB;
-                break;
-            case "radioButtonOFB":
-                selectedBlockEncryptionMode = Mode.OFB;
-                break;
-            default:
-                throw new IllegalEventSourceException(rb.getId());
-        }
-        refreshInitialVector();
-    }
-
-
-    @FXML
-    public void algorithmSelected(ActionEvent event) throws IllegalEventSourceException, NoSuchAlgorithmException {
-        RadioButton rb = (RadioButton) event.getSource();
-
-        switch (rb.getId()) {
-            case "radioButtonAES":
-                selectedEncryptionAlgorithm = Algorithm.AES;
-                break;
-            case "radioButtonDES":
-                selectedEncryptionAlgorithm = Algorithm.DES;
-                break;
-            case "radioButtonDESeee":
-                selectedEncryptionAlgorithm = Algorithm.DESeee;
-                break;
-            case "radioButtonDESede2":
-                selectedEncryptionAlgorithm = Algorithm.DESede2;
-                break;
-            case "radioButtonDESede3":
-                selectedEncryptionAlgorithm = Algorithm.DESede3;
-                break;
-            case "radioButtonBlowfish":
-                selectedEncryptionAlgorithm = Algorithm.Blowfish;
-                break;
-            default:
-                throw new IllegalEventSourceException(rb.getId());
-        }
-        refreshPrivateKey();
-        refreshInitialVector();
-    }
-
-
-    @Override
-    public void windowClosed(String callerClassName) {
-        if (!openedWindows.remove(callerClassName))
-            throw new UnexpectedWindowEventCall("Class name: " + callerClassName);
-    }
-
-    private void writeToLogLabel(String singleLog) {
-        this.logLabel.setText(singleLog);
-        log.log(Level.INFO, singleLog);
-    }
-
-
+    
     private void openNewWindow(String fxmlPath, String windowTitle) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource(fxmlPath));
@@ -388,13 +319,51 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
+            logLabel.writeError("Failed to open a new window " + windowTitle);
             e.printStackTrace();
         }
+    }
+    
+    @FXML
+    public void blockModeSelected(ActionEvent event) throws IllegalEventSourceException {
+        Toggle rb = (Toggle) event.getSource();
+
+        if (toggleModeMap.containsKey(rb)) {
+            selectedBlockEncryptionMode = toggleModeMap.get(rb);
+            refreshInitialVector();
+            logLabel.writeInfo("Selected block mode type: " + selectedBlockEncryptionMode.fullName);
+        }
+        else {
+            logLabel.writeError("Illegal toggle selected: " + event.getSource().toString());
+            throw new IllegalEventSourceException(event.getSource().toString());
+        }
+    }
+
+    @FXML
+    public void algorithmSelected(ActionEvent event) throws IllegalEventSourceException, NoSuchAlgorithmException {
+        Toggle rb = (Toggle) event.getSource();
+
+        if (toggleAlgorithmMap.containsKey(rb)) {
+            selectedEncryptionAlgorithm = toggleAlgorithmMap.get(rb);
+            refreshPrivateKey();
+            refreshInitialVector();
+            logLabel.writeInfo("Selected encryption algorithm type: " + selectedEncryptionAlgorithm.algorithmName);
+        }
+        else {
+            logLabel.writeError("Illegal toggle selected: " + event.getSource().toString());
+            throw new IllegalEventSourceException(event.getSource().toString());
+        }
+    }
+
+    @Override
+    public void windowClosed(String callerClassName) {
+        if (!openedWindows.remove(callerClassName))
+            throw new UnexpectedWindowEventCall("Class name: " + callerClassName);
     }
 
     void loginUser(SessionToken sessionToken) {
         this.sessionToken = sessionToken;
-        writeToLogLabel("Logged in as user: " + sessionToken.getUsername());
+        logLabel.writeInfo("Logged in as user: " + sessionToken.getUsername());
     }
     
     @Override
@@ -409,8 +378,8 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     
     public void setSessionToken(SessionToken sessionToken) {
         this.sessionToken = sessionToken;
-        log.log(Level.INFO, "New session token, username: {0}, valid until: {1}.",
-                new Object[]{ sessionToken.getUsername(), sessionToken.getValidDate().toString() });
+        logLabel.writeInfo("New session token, username: " + sessionToken.getUsername()
+                        + ", valid until: " + sessionToken.getValidDate().toString());
     }
 
 }
