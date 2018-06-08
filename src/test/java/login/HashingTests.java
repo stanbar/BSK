@@ -2,13 +2,15 @@ package login;
 
 import com.milbar.logic.exceptions.ImplementationError;
 import com.milbar.logic.login.CredentialsManager;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class HashingTests {
     
@@ -17,7 +19,7 @@ public class HashingTests {
     private String password = "testpassword123";
     
     @Test
-    public void WhenCalculatingHashAgain_HashMatches() {
+    void WhenCalculatingHashAgain_HashMatches() {
         byte[] salt = credentialsManager.getSalt();
         try {
             byte[] hash = credentialsManager.getHash(password, salt);
@@ -31,7 +33,7 @@ public class HashingTests {
     }
     
     @Test
-    public void WhenValidatingPassword_HashValidationIsCorrect() {
+    void WhenValidatingPassword_HashValidationIsCorrect() {
         byte[] salt = credentialsManager.getSalt();
         try {
             byte[] hash = credentialsManager.getHash(password, salt);
@@ -43,7 +45,7 @@ public class HashingTests {
     }
     
     @Test
-    public void WhenComparingHashes_HashWithDifferentSaltIsDifferent() {
+    void WhenComparingHashes_HashWithDifferentSaltIsDifferent() {
         byte[] salt = credentialsManager.getSalt();
         byte[] saltSecond = credentialsManager.getSalt();
         try {
@@ -57,7 +59,7 @@ public class HashingTests {
     }
     
     @Test
-    public void WhenValidatingPassword_HashWithDifferentSaltIsNotValid() {
+    void WhenValidatingPassword_HashWithDifferentSaltIsNotValid() {
         byte[] salt = credentialsManager.getSalt();
         byte[] saltSecond = credentialsManager.getSalt();
         try {
@@ -70,13 +72,19 @@ public class HashingTests {
         }
     }
     
-    @Test(timeout = 1000)
+    @Test()
     //@Test
-    public void WhenGettingSalt_SaltsDoesNotRepeat() {
+    void WhenGettingSalt_SaltsDoesNotRepeat() {
         int setSize = 100000;
         Integer hash;
         Set<Integer> saltsSet = new HashSet<>(setSize);
         
+        assertTimeout(Duration.ofMillis(1000), () -> GenerateSaltTest(saltsSet, setSize));
+        
+    }
+    
+    private void GenerateSaltTest(Set<Integer> saltsSet, int setSize) {
+        Integer hash;
         for (int i = 0; i < setSize; i++) {
             hash = Arrays.hashCode(credentialsManager.getSalt());
             if (!saltsSet.add(hash))

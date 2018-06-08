@@ -1,7 +1,7 @@
 import com.milbar.Utils;
 import kotlin.text.Charsets;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import javax.crypto.*;
 import javax.crypto.spec.DESKeySpec;
@@ -10,7 +10,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class BruteForceJava {
 
@@ -20,7 +21,7 @@ public class BruteForceJava {
     SecretKeyFactory secretKeyFactory;
     SecretKey key;
 
-    @Before
+    @BeforeAll
     public void setup() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidKeySpecException {
         cipher = Cipher.getInstance("DES/ECB/NoPadding");
         plainText = "KotlinIs".getBytes(Charsets.UTF_8);

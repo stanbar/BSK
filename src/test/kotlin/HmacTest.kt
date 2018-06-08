@@ -1,7 +1,7 @@
 
 import com.milbar.Utils
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import kotlin.system.measureTimeMillis

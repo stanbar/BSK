@@ -2,8 +2,8 @@ import com.milbar.Utils
 import com.milbar.logic.FileCipherJob
 import com.milbar.logic.encryption.Algorithm
 import com.milbar.logic.encryption.Mode
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import java.io.File
 import java.nio.file.Files
 import java.security.KeyFactory
