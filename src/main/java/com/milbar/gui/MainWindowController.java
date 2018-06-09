@@ -4,6 +4,7 @@ import com.milbar.ConfigManager;
 import com.milbar.Utils;
 import com.milbar.gui.abstracts.factories.LoggerFactory;
 import com.milbar.gui.helpers.LogLabel;
+import com.milbar.gui.helpers.LoginController;
 import com.milbar.gui.helpers.TogglesHelper;
 import com.milbar.logic.FileCipherJob;
 import com.milbar.logic.encryption.Algorithm;
@@ -54,14 +55,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     @FXML
     public ToggleGroup modeToggleGroup;
     @FXML
-    public RadioButton radioButtonECB;
-    @FXML
-    public RadioButton radioButtonCBC;
-    @FXML
-    public RadioButton radioButtonCFB;
-    @FXML
-    public RadioButton radioButtonOFB;
-    @FXML
     public ArrayList<RadioButton> encryptionBlockTypeList;
     
     private Map<Mode, Toggle> modeToggleMap;
@@ -69,18 +62,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
 
     @FXML
     public ToggleGroup algorithmToggleGroup;
-    @FXML
-    public RadioButton radioButtonDES;
-    @FXML
-    public RadioButton radioButtonDESeee;
-    @FXML
-    public RadioButton radioButtonDESede2;
-    @FXML
-    public RadioButton radioButtonDESede3;
-    @FXML
-    public RadioButton radioButtonAES;
-    @FXML
-    public RadioButton radioButtonBlowfish;
     @FXML
     private ArrayList<RadioButton> encryptionModeList;
     
@@ -100,6 +81,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     private SessionToken sessionToken;
     private final SimpleObjectProperty<Key> privateKeyObservable = new SimpleObjectProperty<>();
     private final SimpleObjectProperty<byte[]> initialVectorObservable = new SimpleObjectProperty<>();
+    private LoginController loginController = new LoginController();
 
     @FXML
     private TableColumn<FileCipherJob, String> imageNameColumn;
@@ -116,8 +98,8 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     private Label labelInitialVector;
     @FXML
     private Label labelPrivateKey;
-
-
+    
+    
     @FXML
     private void initialize() throws NoSuchAlgorithmException {
         logLabel = new LogLabel(labelWithLogs, log);
@@ -296,9 +278,8 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     }
 
     private void logoutCurrentUser() {
-        if (sessionToken != null) {
-            sessionToken.destroy();
-            sessionToken = null;
+        if (loginController.isLoggedIn()) {
+            loginController.logout();
             logLabel.writeInfo("Successfully logged out.");
         }
         else
@@ -361,11 +342,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
             throw new UnexpectedWindowEventCall("Class name: " + callerClassName);
     }
 
-    void loginUser(SessionToken sessionToken) {
-        this.sessionToken = sessionToken;
-        logLabel.writeInfo("Logged in as user: " + sessionToken.getUsername());
-    }
-    
     @Override
     public void closeWindow() {
     
@@ -381,5 +357,10 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         logLabel.writeInfo("New session token, username: " + sessionToken.getUsername()
                         + ", valid until: " + sessionToken.getValidDate().toString());
     }
-
+    
+    public void loginUser(SessionToken sessionToken) {
+        loginController.login(sessionToken);
+        logLabel.writeInfo("New session token, username: " + sessionToken.getUsername()
+                + ", valid until: " + sessionToken.getValidDate().toString());
+    }
 }

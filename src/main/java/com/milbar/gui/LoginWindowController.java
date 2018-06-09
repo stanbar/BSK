@@ -88,7 +88,7 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     
     private void handleUserLoginEvent(String username, String password) throws LoginException {
         SessionToken sessionToken = loginManager.login(username, password);
-        parentController.setSessionToken(sessionToken);
+        parentController.loginUser(sessionToken);
         closeWindow();
     }
     
