@@ -1,8 +1,8 @@
 package com.milbar.logic;
 
 import com.milbar.Utils;
-import com.milbar.logic.encryption.Algorithm;
-import com.milbar.logic.encryption.Mode;
+import com.milbar.logic.abstracts.Algorithm;
+import com.milbar.logic.abstracts.Mode;
 import com.milbar.logic.exceptions.IllegalFileNameException;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;

@@ -14,7 +14,7 @@ public class MainWindow extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
+    
     @Override
     public void start(Stage stage) throws Exception {
         Logger.info("Starting JavaFX main scene...");

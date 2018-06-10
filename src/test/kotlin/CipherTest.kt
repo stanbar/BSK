@@ -1,7 +1,7 @@
 import com.milbar.Utils
 import com.milbar.logic.FileCipherJob
-import com.milbar.logic.encryption.Algorithm
-import com.milbar.logic.encryption.Mode
+import com.milbar.logic.abstracts.Algorithm
+import com.milbar.logic.abstracts.Mode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.io.File

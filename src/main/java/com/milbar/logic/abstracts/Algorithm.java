@@ -1,4 +1,4 @@
-package com.milbar.logic.encryption;
+package com.milbar.logic.abstracts;
 
 /**
  * https://docs.oracle.com/javase/6/docs/technotes/guides/security/SunProviders.html

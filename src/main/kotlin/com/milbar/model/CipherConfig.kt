@@ -1,8 +1,8 @@
 package com.milbar.model
 
 import com.milbar.Utils
-import com.milbar.logic.encryption.Algorithm
-import com.milbar.logic.encryption.Mode
+import com.milbar.logic.abstracts.Algorithm
+import com.milbar.logic.abstracts.Mode
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 

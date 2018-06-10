@@ -1,8 +1,8 @@
 package com.milbar.gui.helpers;
 
 import com.milbar.gui.abstracts.factories.LoggerFactory;
-import com.milbar.logic.encryption.Algorithm;
-import com.milbar.logic.encryption.Mode;
+import com.milbar.logic.abstracts.Algorithm;
+import com.milbar.logic.abstracts.Mode;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Toggle;
 

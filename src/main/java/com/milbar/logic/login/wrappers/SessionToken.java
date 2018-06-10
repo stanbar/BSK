@@ -1,6 +1,7 @@
 package com.milbar.logic.login.wrappers;
 
 import com.milbar.gui.configuration.ApplicationConfiguration;
+import com.milbar.logic.abstracts.Destroyable;
 
 import java.util.Arrays;
 import java.util.Date;

@@ -15,25 +15,43 @@ import java.util.logging.Logger;
 
 public class CredentialsManager {
     
-    private Logger logger = LoggerFactory.getLogger(CredentialsManager.class);
+    private static Logger logger = LoggerFactory.getLogger(CredentialsManager.class);
     
-    private final Random random = new SecureRandom();
+    private final static Random random = new SecureRandom();
     private static final int HASH_ITERATIONS = 100;
     private static final int HASH_LENGTH_IN_BYTES = 128;
     
     
-    public byte[] getSalt() {
+    public static byte[] getSalt() {
         byte[] salt = new byte[16];
         random.nextBytes(salt);
         return salt;
     }
     
-    public SessionToken getRandomSessionToken(final String username) {
+    /**
+     * Creates random bytes array based on SecureRandom.
+     * @param length in bytes
+     * @return random bytes array with specified length
+     */
+    
+    public static byte[] getSalt(int length) {
+        byte[] salt = new byte[length];
+        random.nextBytes(salt);
+        return salt;
+    }
+    
+    public static byte[] getSalt(Random random) {
+        byte[] salt = new byte[16];
+        random.nextBytes(salt);
+        return salt;
+    }
+    
+    public static SessionToken getRandomSessionToken(final String username) {
         byte[] token = getSalt();
         return new SessionToken(username, token);
     }
     
-    public byte[] getHash(final String password, final byte[] salt) throws ImplementationError {
+    public static byte[] getHash(final String password, final byte[] salt) throws ImplementationError {
         byte[] hash;
         try {
             SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
@@ -50,20 +68,17 @@ public class CredentialsManager {
         return hash;
     }
     
-    public boolean validatePassword(final String password, final byte[] salt, final byte[] hash) {
+    public static boolean validatePassword(final String password, final byte[] salt, final byte[] hash) {
         try {
             byte[] generatedHash = getHash(password, salt);
-            if (hashEquals(generatedHash, hash))
-                return true;
-            else
-                return false;
+            return hashEquals(generatedHash, hash);
         } catch (ImplementationError e) {
             e.printStackTrace();
         }
         return false;
     }
     
-    private boolean hashEquals(final byte[] left, final byte[] right) {
+    private static boolean hashEquals(final byte[] left, final byte[] right) {
         if (left.length != right.length)
             return false;
         

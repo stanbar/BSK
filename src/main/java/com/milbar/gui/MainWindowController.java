@@ -7,8 +7,8 @@ import com.milbar.gui.helpers.LogLabel;
 import com.milbar.gui.helpers.LoginController;
 import com.milbar.gui.helpers.TogglesHelper;
 import com.milbar.logic.FileCipherJob;
-import com.milbar.logic.encryption.Algorithm;
-import com.milbar.logic.encryption.Mode;
+import com.milbar.logic.abstracts.Algorithm;
+import com.milbar.logic.abstracts.Mode;
 import com.milbar.logic.exceptions.IllegalEventSourceException;
 import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
 import com.milbar.logic.login.wrappers.SessionToken;
@@ -40,7 +40,6 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MainWindowController extends JavaFXController implements JavaFXWindowsListener {
@@ -68,7 +67,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     private Map<Algorithm, Toggle> algorithmToggleMap;
     private Map<Toggle, Algorithm> toggleAlgorithmMap;
     
-
     private ExecutorService executor = Executors.newFixedThreadPool(THREADS_POOL_SIZE);
     private ObservableList<FileCipherJob> tableElementsList = FXCollections.observableArrayList();
     private Mode selectedBlockEncryptionMode = DEFAULT_BLOCK_ENCRYPTION_MODE;
@@ -180,11 +178,9 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
                 Desktop.getDesktop().open(file);
             } catch (IOException e) {
                 e.printStackTrace();
-                log.log(Level.SEVERE, e.getMessage());
+                logLabel.writeError(e.getMessage());
             }
         }
-
-
     }
 
     @FXML
@@ -200,11 +196,15 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
             CipherConfig config = ConfigManager.loadConfig(file);
-            privateKeyObservable.setValue(config.getSecretKey());
-            initialVectorObservable.setValue(config.getInitialVectorBytes());
-            selectToggleMode(config.getMode());
-            selectToggleAlgorithm(config.getAlgorithm());
+            updateApplicationStance(config);
         }
+    }
+    
+    private void updateApplicationStance(CipherConfig config) {
+        privateKeyObservable.setValue(config.getSecretKey());
+        initialVectorObservable.setValue(config.getInitialVectorBytes());
+        selectToggleMode(config.getMode());
+        selectToggleAlgorithm(config.getAlgorithm());
     }
 
     private void selectToggleMode(Mode mode) {
@@ -244,16 +244,16 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     private void refreshTable() {
 
         imageNameColumn.setCellValueFactory( //nazwa pliku
-                p -> new SimpleStringProperty(p.getValue().getFile().getName()));
+                cell -> new SimpleStringProperty(cell.getValue().getFile().getName()));
 
         statusColumn.setCellValueFactory( //status przetwarzania
-                p -> p.getValue().getStatusProperty());
+                cell -> cell.getValue().getStatusProperty());
 
         progressColumn.setCellFactory( //wykorzystanie paska postępu
                 ProgressBarTableCell.forTableColumn());
 
         progressColumn.setCellValueFactory( //postęp przetwarzania
-                p -> p.getValue().getProgressProperty().asObject());
+                cell -> cell.getValue().getProgressProperty().asObject());
 
         filesTable.setItems(tableElementsList);
     }
@@ -350,12 +350,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     @Override
     public void setParentController(JavaFXController parentController) {
         throw new NotImplementedException("This controlled can't have parent controllers.");
-    }
-    
-    public void setSessionToken(SessionToken sessionToken) {
-        this.sessionToken = sessionToken;
-        logLabel.writeInfo("New session token, username: " + sessionToken.getUsername()
-                        + ", valid until: " + sessionToken.getValidDate().toString());
     }
     
     public void loginUser(SessionToken sessionToken) {

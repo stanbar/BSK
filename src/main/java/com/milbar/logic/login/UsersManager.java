@@ -7,7 +7,10 @@ import com.milbar.logic.login.wrappers.SessionToken;
 import com.milbar.logic.login.wrappers.UserCredentials;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,7 +19,6 @@ public class UsersManager {
     private final static Logger logger = LoggerFactory.getLogger(UsersManager.class);
     
     private SerializedDataReader<String, UserCredentials> usersCollection;
-    private CredentialsManager credentialsManager = new CredentialsManager();
     
     UsersManager(Path pathToUsersData) {
         usersCollection = new SerializedDataReader<>(pathToUsersData);
@@ -38,10 +40,10 @@ public class UsersManager {
         if (usersCollection.keyExists(username))
             throw new UserAlreadyExists("User with name: " + username + " already exists.");
         
-        byte[] salt = credentialsManager.getSalt();
+        byte[] salt = CredentialsManager.getSalt();
         byte[] hashedPassword;
         try {
-            hashedPassword = credentialsManager.getHash(password, salt);
+            hashedPassword = CredentialsManager.getHash(password, salt);
             UserCredentials newUser = new UserCredentials(username, hashedPassword, salt);
             usersCollection.updateCollection(username, newUser);
         } catch (ImplementationError | WritingSerializedFileException e) {
@@ -59,7 +61,7 @@ public class UsersManager {
         
         byte[] salt = usersCredentials.getSalt();
         byte[] hashedPassword = usersCredentials.getHashedPassword();
-        if (credentialsManager.validatePassword(password, salt, hashedPassword)) {
+        if (CredentialsManager.validatePassword(password, salt, hashedPassword)) {
             try {
                 usersCollection.removeItem(username);
             } catch (WritingSerializedFileException e) {
@@ -79,8 +81,8 @@ public class UsersManager {
         
         byte[] salt = userCredentials.getSalt();
         byte[] hashedPassword = userCredentials.getHashedPassword();
-        if (credentialsManager.validatePassword(password, salt, hashedPassword))
-            return credentialsManager.getRandomSessionToken(username);
+        if (CredentialsManager.validatePassword(password, salt, hashedPassword))
+            return CredentialsManager.getRandomSessionToken(username);
         else
             throw new UsersPasswordNotValid("Login operation for " + username + " failed. Given password is wrong.");
     }

@@ -1,4 +1,4 @@
-package com.milbar.logic.login.wrappers;
+package com.milbar.logic.abstracts;
 
 public interface Destroyable {
     
