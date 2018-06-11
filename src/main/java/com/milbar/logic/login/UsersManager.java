@@ -1,6 +1,8 @@
 package com.milbar.logic.login;
 
 import com.milbar.gui.abstracts.factories.LoggerFactory;
+import com.milbar.logic.encryption.wrappers.HashAndSalt;
+import com.milbar.logic.encryption.wrappers.KeyAndSalt;
 import com.milbar.logic.exceptions.*;
 import com.milbar.logic.login.loaders.SerializedDataReader;
 import com.milbar.logic.login.wrappers.SessionToken;
@@ -18,7 +20,7 @@ public class UsersManager {
     
     private final static Logger logger = LoggerFactory.getLogger(UsersManager.class);
     
-    private SerializedDataReader<String, UserCredentials> usersCollection;
+    private SerializedDataReader<String, EncryptedUserCredentials> usersCollection;
     
     UsersManager(Path pathToUsersData) {
         usersCollection = new SerializedDataReader<>(pathToUsersData);
@@ -40,11 +42,10 @@ public class UsersManager {
         if (usersCollection.keyExists(username))
             throw new UserAlreadyExists("User with name: " + username + " already exists.");
         
-        byte[] salt = CredentialsManager.getSalt();
-        byte[] hashedPassword;
         try {
-            hashedPassword = CredentialsManager.getHash(password, salt);
-            UserCredentials newUser = new UserCredentials(username, hashedPassword, salt);
+            HashAndSalt hashAndSalt = new HashAndSalt(password);
+            KeyAndSalt keyAndSalt = new KeyAndSalt();
+            UserCredentials newUser = new UserCredentials(username, hashAndSalt, keyAndSalt);
             usersCollection.updateCollection(username, newUser);
         } catch (ImplementationError | WritingSerializedFileException e) {
             e.printStackTrace();
@@ -59,8 +60,8 @@ public class UsersManager {
         if (usersCredentials == null)
             throw new UserDoesNotExist("Failed to remove user, because there is not user with name: " + username);
         
-        byte[] salt = usersCredentials.getSalt();
-        byte[] hashedPassword = usersCredentials.getHashedPassword();
+        byte[] salt = usersCredentials.getPasswordSalt();
+        byte[] hashedPassword = usersCredentials.getPasswordHash();
         if (CredentialsManager.validatePassword(password, salt, hashedPassword)) {
             try {
                 usersCollection.removeItem(username);
@@ -79,10 +80,10 @@ public class UsersManager {
         if (usersCollection == null)
             throw new UserDoesNotExist("User with name: " + username + " does not exists.");
         
-        byte[] salt = userCredentials.getSalt();
-        byte[] hashedPassword = userCredentials.getHashedPassword();
+        byte[] salt = userCredentials.getPasswordSalt();
+        byte[] hashedPassword = userCredentials.getPasswordHash();
         if (CredentialsManager.validatePassword(password, salt, hashedPassword))
-            return CredentialsManager.getRandomSessionToken(username);
+            return new SessionToken(username, userCredentials.getKeyAndSalt());
         else
             throw new UsersPasswordNotValid("Login operation for " + username + " failed. Given password is wrong.");
     }

@@ -2,8 +2,8 @@ package com.milbar.logic.login.wrappers;
 
 import com.milbar.gui.configuration.ApplicationConfiguration;
 import com.milbar.logic.abstracts.Destroyable;
+import com.milbar.logic.encryption.wrappers.KeyAndSalt;
 
-import java.util.Arrays;
 import java.util.Date;
 
 public class SessionToken implements Destroyable {
@@ -11,21 +11,21 @@ public class SessionToken implements Destroyable {
     private final static long SESSION_LENGTH = ApplicationConfiguration.getSessionLength();
     
     private String username;
-    private byte[] token;
+    private KeyAndSalt usersEncryptionKey;
     private Date sessionValidUntil;
     
-    public SessionToken(String username, byte[] token) {
+    public SessionToken(String username, KeyAndSalt usersEncryptionKey) {
         this.username = username;
-        this.token = token;
+        this.usersEncryptionKey = usersEncryptionKey;
         refresh();
-    }
-    
-    public byte[] getToken() {
-        return token;
     }
     
     public String getUsername() {
         return username;
+    }
+    
+    public KeyAndSalt getUsersEncryptionKey() {
+        return usersEncryptionKey;
     }
     
     public Date getValidDate() {
@@ -42,30 +42,8 @@ public class SessionToken implements Destroyable {
         return currentDate.getTime() <= sessionValidUntil.getTime();
     }
     
-    @Override
-    public boolean equals(Object other) {
-        if (this == other)
-            return true;
-        
-        if (other instanceof SessionToken) {
-            SessionToken otherToken = (SessionToken)other;
-            return Arrays.equals(this.token, otherToken.token)
-                    && this.username.equals(otherToken.username);
-        }
-        else
-            return false;
-    }
-    
-    @Override
-    public int hashCode() {
-        int result = 17;
-        result = 31 * result + Arrays.hashCode(this.token);
-        result = 31 * result + username.hashCode();
-        return result;
-    }
-    
     public void destroy() {
+        usersEncryptionKey.destroy();
         this.username = null;
-        this.token = null;
     }
 }

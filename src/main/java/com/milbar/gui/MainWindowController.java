@@ -169,7 +169,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         File file = fileChooser.showSaveDialog(null);
         if (file != null) {
-
             file = ConfigManager.saveConfig(file, new CipherConfig(privateKeyObservable.get().getEncoded(),
                     initialVectorObservable.get(),
                     selectedEncryptionAlgorithm,

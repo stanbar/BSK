@@ -2,7 +2,6 @@ package com.milbar.logic.login;
 
 import com.milbar.gui.abstracts.factories.LoggerFactory;
 import com.milbar.logic.exceptions.ImplementationError;
-import com.milbar.logic.login.wrappers.SessionToken;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -44,11 +43,6 @@ public class CredentialsManager {
         byte[] salt = new byte[16];
         random.nextBytes(salt);
         return salt;
-    }
-    
-    public static SessionToken getRandomSessionToken(final String username) {
-        byte[] token = getSalt();
-        return new SessionToken(username, token);
     }
     
     public static byte[] getHash(final String password, final byte[] salt) throws ImplementationError {

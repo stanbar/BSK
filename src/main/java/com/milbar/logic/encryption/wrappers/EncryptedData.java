@@ -1,24 +1,30 @@
 package com.milbar.logic.encryption.wrappers;
 
-import javax.crypto.spec.IvParameterSpec;
-import java.io.Serializable;
+import com.milbar.logic.abstracts.Destroyable;
 
-public class EncryptedData implements Serializable {
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+public abstract class EncryptedData implements Destroyable {
     
-    private byte[] data;
-    private IvParameterSpec ivParameterSpec;
+    KeyAndSalt keyAndSalt;
     
-    public EncryptedData(IvParameterSpec ivParameterSpec, byte[] data) {
-        this.ivParameterSpec = ivParameterSpec;
-        this.data = data;
+    public EncryptedData(KeyAndSalt keyAndSalt) {
+        this.keyAndSalt = keyAndSalt;
     }
     
-    
-    public byte[] getData() {
-        return data;
+    @Override
+    public void destroy() {
+       keyAndSalt.destroy();
     }
     
-    public IvParameterSpec getIvParameterSpec() {
-        return ivParameterSpec;
+    public abstract InputStream getInputStream() throws IOException;
+    
+    public abstract OutputStream getOutputStream() throws IOException;
+    
+    public KeyAndSalt getKeyAndSalt() {
+        return keyAndSalt;
     }
+    
 }
