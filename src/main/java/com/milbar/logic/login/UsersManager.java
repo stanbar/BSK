@@ -1,6 +1,7 @@
 package com.milbar.logic.login;
 
 import com.milbar.gui.abstracts.factories.LoggerFactory;
+import com.milbar.logic.encryption.factories.AESKeysFactory;
 import com.milbar.logic.encryption.wrappers.HashAndSalt;
 import com.milbar.logic.encryption.wrappers.KeyAndSalt;
 import com.milbar.logic.exceptions.*;
@@ -8,6 +9,7 @@ import com.milbar.logic.login.loaders.SerializedDataReader;
 import com.milbar.logic.login.wrappers.SessionToken;
 import com.milbar.logic.login.wrappers.UserCredentials;
 
+import javax.crypto.SecretKey;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +22,7 @@ public class UsersManager {
     
     private final static Logger logger = LoggerFactory.getLogger(UsersManager.class);
     
-    private SerializedDataReader<String, EncryptedUserCredentials> usersCollection;
+    private SerializedDataReader<String, UserCredentials> usersCollection;
     
     UsersManager(Path pathToUsersData) {
         usersCollection = new SerializedDataReader<>(pathToUsersData);
@@ -44,7 +46,9 @@ public class UsersManager {
         
         try {
             HashAndSalt hashAndSalt = new HashAndSalt(password);
-            KeyAndSalt keyAndSalt = new KeyAndSalt();
+            byte[] keySalt = CredentialsManager.getSalt(64);
+            SecretKey secretKey = AESKeysFactory.getSecretKey(password, keySalt);
+            KeyAndSalt keyAndSalt = new KeyAndSalt(secretKey, password, keySalt);
             UserCredentials newUser = new UserCredentials(username, hashAndSalt, keyAndSalt);
             usersCollection.updateCollection(username, newUser);
         } catch (ImplementationError | WritingSerializedFileException e) {
