@@ -23,7 +23,7 @@ public class MainWindow extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader();
         Parent rootNode = fxmlLoader.load(getClass().getResourceAsStream(fxmlFile));
         Scene scene = new Scene(rootNode);
-        stage.setTitle("Stanislaw Baranski 160518 i Patryk Milewski 160503");
+        stage.setTitle("Stanislaw Baranski 160518, Patryk Milewski 160503");
         stage.getIcons().add(new Image("images/logo.png"));
         stage.setScene(scene);
         stage.show();
