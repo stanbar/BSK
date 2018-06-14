@@ -1,5 +1,6 @@
 package com.milbar.logic.encryption.wrappers.data;
 
+import com.milbar.logic.encryption.factories.AESKeysFactory;
 import com.milbar.logic.exceptions.DecryptionException;
 import com.milbar.logic.exceptions.EncryptionException;
 
@@ -17,12 +18,14 @@ public class EncryptedAESObject<E extends Serializable> extends EncryptedObject<
     
     private transient SecretKeySpec secretKeySpec;
     
-    EncryptedAESObject(E object, IvParameterSpec ivParameterSpec, Cipher cipher, SecretKey secretKey) {
+    public EncryptedAESObject(E object, Cipher cipher, SecretKey secretKey) {
         super(object, cipher);
-        this.ivParameterSpec = ivParameterSpec;
+        byte[] iv = AESKeysFactory.getIv(32);
+        this.ivParameterSpec = new IvParameterSpec(iv);
         secretKeySpec = (SecretKeySpec)secretKey;
     }
     
+    @Override
     public void encrypt() throws EncryptionException {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
@@ -33,6 +36,7 @@ public class EncryptedAESObject<E extends Serializable> extends EncryptedObject<
         }
     }
     
+    @Override
     public void decrypt() throws DecryptionException {
         try {
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);

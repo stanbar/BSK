@@ -1,5 +1,6 @@
 package com.milbar.logic.encryption.wrappers.data;
 
+import com.milbar.logic.encryption.factories.AESKeysFactory;
 import com.milbar.logic.exceptions.DecryptionException;
 import com.milbar.logic.exceptions.EncryptionException;
 
@@ -18,13 +19,14 @@ public class EncryptedAESStream extends EncryptedStream implements Serializable 
     private SecretKeySpec secretKeySpec;
     private IvParameterSpec ivParameterSpec;
     
-    EncryptedAESStream(InputStream inputStream, OutputStream outputStream,
-                       IvParameterSpec ivParameterSpec, Cipher cipher, SecretKey secretKey) {
+    EncryptedAESStream(InputStream inputStream, OutputStream outputStream, Cipher cipher, SecretKey secretKey) {
         super(inputStream, outputStream, cipher);
         secretKeySpec = (SecretKeySpec)secretKey;
-        this.ivParameterSpec = ivParameterSpec;
+        byte[] iv = AESKeysFactory.getIv(32);
+        this.ivParameterSpec = new IvParameterSpec(iv);
     }
     
+    @Override
     void encrypt() throws EncryptionException {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
@@ -35,6 +37,7 @@ public class EncryptedAESStream extends EncryptedStream implements Serializable 
         }
     }
     
+    @Override
     void decrypt() throws DecryptionException {
         try {
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);

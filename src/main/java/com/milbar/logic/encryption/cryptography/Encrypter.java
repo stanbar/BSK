@@ -1,5 +1,6 @@
 package com.milbar.logic.encryption.cryptography;
 
+import com.milbar.logic.abstracts.Destroyable;
 import com.milbar.logic.exceptions.EncryptionException;
 
 import javax.crypto.Cipher;
@@ -7,7 +8,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Encrypter extends Cryptography {
+public class Encrypter extends Cryptography implements Destroyable {
 
     public Encrypter(Cipher cipher) {
         super(cipher);

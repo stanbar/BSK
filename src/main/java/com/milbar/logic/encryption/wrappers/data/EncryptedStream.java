@@ -21,10 +21,6 @@ public abstract class EncryptedStream extends EncryptedData implements Serializa
         this.outputStream = outputStream;
     }
     
-    abstract void encrypt() throws EncryptionException;
-    
-    abstract void decrypt() throws DecryptionException;
-    
     void encryptStream() throws EncryptionException {
         if (isEncrypted)
             return;
@@ -43,6 +39,11 @@ public abstract class EncryptedStream extends EncryptedData implements Serializa
         decrypter.decrypt(inputStream, outputStream);
         destroyDecrypter();
         isEncrypted = false;
+    }
+    
+    void updateStreams(InputStream inputStream, OutputStream outputStream) {
+        this.inputStream = inputStream;
+        this.outputStream = outputStream;
     }
     
 }

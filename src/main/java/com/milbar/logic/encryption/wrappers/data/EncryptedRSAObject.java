@@ -17,6 +17,7 @@ public class EncryptedRSAObject<E extends Serializable> extends EncryptedObject<
         this.keyPair = keyPair;
     }
     
+    @Override
     public void encrypt() throws EncryptionException {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic());
@@ -27,6 +28,7 @@ public class EncryptedRSAObject<E extends Serializable> extends EncryptedObject<
         }
     }
     
+    @Override
     public void decrypt() throws DecryptionException {
         try {
             cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());

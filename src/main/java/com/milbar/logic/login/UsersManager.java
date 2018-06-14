@@ -4,6 +4,8 @@ import com.milbar.gui.abstracts.factories.LoggerFactory;
 import com.milbar.logic.encryption.factories.AESKeysFactory;
 import com.milbar.logic.encryption.wrappers.HashAndSalt;
 import com.milbar.logic.encryption.wrappers.KeyAndSalt;
+import com.milbar.logic.encryption.wrappers.data.EncryptedAESObject;
+import com.milbar.logic.encryption.wrappers.data.EncryptedObject;
 import com.milbar.logic.exceptions.*;
 import com.milbar.logic.login.loaders.SerializedDataReader;
 import com.milbar.logic.login.wrappers.SessionToken;
@@ -22,7 +24,7 @@ public class UsersManager {
     
     private final static Logger logger = LoggerFactory.getLogger(UsersManager.class);
     
-    private SerializedDataReader<String, UserCredentials> usersCollection;
+    private SerializedDataReader<String, EncryptedObject<UserCredentials>> usersCollection;
     
     UsersManager(Path pathToUsersData) {
         usersCollection = new SerializedDataReader<>(pathToUsersData);
@@ -30,7 +32,7 @@ public class UsersManager {
             usersCollection.readFromFile();
         } catch (ReadingSerializedFileException e) {
             try {
-                Map<String, UserCredentials> usersList = new HashMap<>();
+                Map<String, EncryptedObject<UserCredentials>> usersList = new HashMap<>();
                 usersCollection.updateCollection(usersList);
                 logger.log(Level.WARNING, "Failed to load users data from file. Creating a new, empty collection.");
             } catch (WritingSerializedFileException writeException) {
@@ -50,6 +52,7 @@ public class UsersManager {
             SecretKey secretKey = AESKeysFactory.getSecretKey(password, keySalt);
             KeyAndSalt keyAndSalt = new KeyAndSalt(secretKey, password, keySalt);
             UserCredentials newUser = new UserCredentials(username, hashAndSalt, keyAndSalt);
+            EncryptedAESObject<UserCredentials> encryptedUserCredentials = new EncryptedAESObject<>();
             usersCollection.updateCollection(username, newUser);
         } catch (ImplementationError | WritingSerializedFileException e) {
             e.printStackTrace();

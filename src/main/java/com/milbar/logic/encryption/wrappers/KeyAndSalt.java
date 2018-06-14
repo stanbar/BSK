@@ -3,18 +3,18 @@ package com.milbar.logic.encryption.wrappers;
 import com.milbar.logic.abstracts.ArrayDestroyer;
 import com.milbar.logic.abstracts.Destroyable;
 
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
 import java.io.Serializable;
 
 public class KeyAndSalt implements Destroyable, Serializable {
     
-    private SecretKeySpec secretKeySpec;
+    private SecretKey secretKey;
     private byte[] salt;
     private char[] keyPassword;
     
     
-    public KeyAndSalt(SecretKeySpec secretKeySpec, String password, byte[] salt) {
-        this.secretKeySpec = secretKeySpec;
+    public KeyAndSalt(SecretKey secretKey, String password, byte[] salt) {
+        this.secretKey = secretKey;
         this.salt = salt;
         keyPassword = password.toCharArray();
     }
@@ -23,13 +23,13 @@ public class KeyAndSalt implements Destroyable, Serializable {
     public void destroy() {
         ArrayDestroyer.destroy(salt);
         ArrayDestroyer.destroy(keyPassword);
-        secretKeySpec = null;
+        secretKey = null;
         keyPassword = null;
         salt = null;
     }
     
-    public SecretKeySpec getSecretKeySpec() {
-        return secretKeySpec;
+    public SecretKey getSecretKeySpec() {
+        return secretKey;
     }
     
     public byte[] getSalt() {

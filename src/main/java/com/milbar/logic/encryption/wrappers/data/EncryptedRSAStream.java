@@ -19,6 +19,7 @@ public class EncryptedRSAStream extends EncryptedStream implements Serializable 
         this.keyPair = keyPair;
     }
     
+    @Override
     void encrypt() throws EncryptionException {
         try {
             cipher.init(Cipher.ENCRYPT_MODE, keyPair.getPublic());
@@ -29,6 +30,7 @@ public class EncryptedRSAStream extends EncryptedStream implements Serializable 
         }
     }
     
+    @Override
     void decrypt() throws DecryptionException {
         try {
             cipher.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());

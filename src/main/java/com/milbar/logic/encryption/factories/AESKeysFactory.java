@@ -8,6 +8,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
@@ -62,4 +63,10 @@ public abstract class AESKeysFactory {
         }
     }
     
+    public static byte[] getIv(int lengthInBytes) {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] iv = new byte[lengthInBytes];
+        secureRandom.nextBytes(iv);
+        return iv;
+    }
 }

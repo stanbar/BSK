@@ -17,10 +17,6 @@ public abstract class EncryptedObject <E extends Serializable> extends Encrypted
         this.object = object;
     }
     
-    abstract void encrypt() throws EncryptionException;
-    
-    abstract void decrypt() throws DecryptionException;
-    
     void encryptObject() throws EncryptionException {
         if (isEncrypted)
             return;
