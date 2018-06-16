@@ -1,7 +1,6 @@
 package com.milbar.gui.helpers;
 
 import com.milbar.logic.abstracts.Algorithm;
-import com.milbar.logic.abstracts.Mode;
 import com.milbar.logic.exceptions.UserIsNotLoggedIn;
 import com.milbar.logic.login.wrappers.SessionToken;
 

@@ -1,54 +1,38 @@
 package com.milbar.logic.login.wrappers;
 
-import com.milbar.logic.abstracts.Destroyable;
-import com.milbar.logic.encryption.wrappers.HashAndSalt;
-import com.milbar.logic.encryption.wrappers.KeyAndSalt;
+import com.milbar.logic.encryption.factories.RSACipherFactory;
+import com.milbar.logic.encryption.factories.RSAFactory;
 
 import java.io.Serializable;
-import java.security.spec.KeySpec;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
-public class UserCredentials implements Destroyable, Serializable {
+public class UserCredentials implements Serializable {
     
     private String username;
-    private HashAndSalt hashAndSalt;
-    private KeyAndSalt keyAndSalt;
     
-    public UserCredentials(String username, HashAndSalt hashAndSalt, KeyAndSalt keyAndSalt) {
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
+    
+    public UserCredentials(String username) {
         this.username = username;
-        this.hashAndSalt = hashAndSalt;
-        this.keyAndSalt = keyAndSalt;
+        RSACipherFactory cipherFactory = new RSACipherFactory(new RSAFactory());
+        KeyPair keyPair = cipherFactory.getKeyPairDefault();
+        this.publicKey = keyPair.getPublic();
+        this.privateKey = keyPair.getPrivate();
     }
     
-    public void destroy() {
-        hashAndSalt.destroy();
-        keyAndSalt.destroy();
-    }
     public String getUsername() {
         return username;
     }
     
-    public HashAndSalt getHashAndSalt() {
-        return hashAndSalt;
+    public PublicKey getPublicKey() {
+        return publicKey;
     }
     
-    public byte[] getPasswordHash() {
-        return hashAndSalt.getHash();
-    }
-    
-    public byte[] getPasswordSalt() {
-        return hashAndSalt.getSalt();
-    }
-    
-    public KeyAndSalt getKeyAndSalt() {
-        return keyAndSalt;
-    }
-    
-    public byte[] getKeySalt() {
-        return keyAndSalt.getSalt();
-    }
-    
-    public KeySpec getKeySpec() {
-        return keyAndSalt.getKeySpec();
+    public PrivateKey getPrivateKey() {
+        return privateKey;
     }
     
 }

@@ -3,13 +3,12 @@ package com.milbar.logic.encryption.cryptography;
 import com.milbar.logic.encryption.wrappers.data.AESEncryptedObject;
 import com.milbar.logic.encryption.wrappers.data.RSAEncryptedObject;
 import com.milbar.logic.exceptions.DecryptionException;
+import com.milbar.logic.security.wrappers.Password;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.security.PrivateKey;
 
-public interface Decryption {
+public interface DecryptionObject {
     
     /**
      * This method is used for decryption of an object, that is wrapped in AESEncryptedObject class, which represents
@@ -21,7 +20,7 @@ public interface Decryption {
      * @throws DecryptionException If there is any error in decryption, then it is caught and thrown as
      *                             DecryptionException, with it's original or custom message.
      */
-    <E extends Serializable> E decryptObject(AESEncryptedObject<E> object, char[] password) throws DecryptionException;
+    <E extends Serializable> E decryptObject(AESEncryptedObject<E> object, Password password) throws DecryptionException;
     
     /**
      * This method is used for decryption of an object, that is wrapped in RSAEncryptedObject class, which represents
@@ -34,27 +33,5 @@ public interface Decryption {
      *                             DecryptionException, with it's original or custom message.
      */
     <E extends Serializable> E decryptObject(RSAEncryptedObject<E> object, PrivateKey privateKey) throws DecryptionException;
-    
-    /**
-     * This method is used for decryption of encrypted data in given input stream. The encryption algorithm must be AES.
-     * The input stream must contain AESFactory serialized header, which was used to encryption.
-     * @param inputStream Encrypted stream with data with AES algorithm.
-     * @param outputStream Decrypted stream with original data.
-     * @param password Password that will be used for creating PBBKeySpec for AES decryption.
-     * @throws DecryptionException If there is any error in decryption, then it is caught and thrown as
-     *                             DecryptionException, with it's original or custom message.
-     */
-    void decryptStream(InputStream inputStream, OutputStream outputStream, char[] password) throws DecryptionException;
-    
-    /**
-     * This method is used for decryption of encrypted data in given input stream. The encryption algorithm must be RSA.
-     * The input stream must contain RSAFactory serialized header, which was used to encryption.
-     * @param inputStream Encrypted stream with data with RSA algorithm.
-     * @param outputStream Decrypted stream with original data.
-     * @param privateKey Private RSA key needed for decryption.
-     * @throws DecryptionException If there is any error in decryption, then it is caught and thrown as
-     *                             DecryptionException, with it's original or custom message.
-     */
-    void decryptStream(InputStream inputStream, OutputStream outputStream, PrivateKey privateKey) throws DecryptionException;
-    
+
 }

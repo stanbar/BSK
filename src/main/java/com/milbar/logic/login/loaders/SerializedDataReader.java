@@ -6,6 +6,8 @@ import com.milbar.logic.exceptions.WritingSerializedFileException;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -90,5 +92,9 @@ public class SerializedDataReader <K, V> {
         }
         else
             return false;
+    }
+    
+    public List<K> getKeysList() {
+        return new ArrayList<>(serializedCollection.keySet());
     }
 }

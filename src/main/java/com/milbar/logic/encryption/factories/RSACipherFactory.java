@@ -27,6 +27,17 @@ public class RSACipherFactory extends CipherFactory implements Serializable {
         return generator.genKeyPair();
     }
     
+    public KeyPair getKeyPairDefault() {
+        RSAFactory rsaFactory = new RSAFactory();
+        try {
+            KeyPairGenerator generator = KeyPairGenerator.getInstance(rsaFactory.getAlgorithmName());
+            generator.initialize(rsaFactory.getKeySize());
+            return generator.genKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+    
     public Cipher getEncryptCipher(PublicKey publicKey) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         Cipher cipher = Cipher.getInstance(algorithmFullName);
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);

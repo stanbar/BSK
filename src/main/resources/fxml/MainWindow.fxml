@@ -54,7 +54,7 @@
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="296.0" prefWidth="722.0">
                     <children>
                         <VBox alignment="CENTER" layoutX="100.0" layoutY="91.0" spacing="10">
-                            <Button mnemonicParsing="false" onAction="#chooseFilesButtonClicked" text="Choose files"/>
+                            <Button mnemonicParsing="false" onAction="#chooseFilesForEncryptionButtonClicked" text="Choose files"/>
 
                             <HBox spacing="10">
                                 <Button mnemonicParsing="false" onAction="#encryptFilesButtonClicked"
@@ -66,10 +66,6 @@
                             <ProgressBar fx:id="encryptionProgressBar" minWidth="200"/>
                         </VBox>
                         <VBox layoutX="345.0" layoutY="12.0" spacing="5">
-                            <HBox spacing="10">
-                                <Button mnemonicParsing="false" onAction="#loadCipherConfig" text="Load config"/>
-                                <Button mnemonicParsing="false" onAction="#saveCipherConfig" text="Save config"/>
-                            </HBox>
                             <HBox alignment="BASELINE_LEFT" spacing="10">
                                 <VBox layoutX="445.0" layoutY="12.0" spacing="10">
                                     <Label text="Algorithm"/>
@@ -149,7 +145,7 @@
                                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
                                    editable="true">
                             <columns>
-                                <TableColumn fx:id="imageNameColumn" prefWidth="178.0" text="Name" />
+                                <TableColumn fx:id="fileNameColumn" prefWidth="178.0" text="Name" />
                                 <TableColumn fx:id="progressColumn" prefWidth="190.0" text="Progress"/>
                                 <TableColumn fx:id="statusColumn" minWidth="0.0" prefWidth="320.0" text="Status"/>
                             </columns>

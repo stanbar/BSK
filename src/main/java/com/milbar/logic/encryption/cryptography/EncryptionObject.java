@@ -1,16 +1,15 @@
 package com.milbar.logic.encryption.cryptography;
 
-import com.milbar.logic.abstracts.EncryptionBlockModeType;
+import com.milbar.logic.abstracts.Mode;
 import com.milbar.logic.encryption.wrappers.data.AESEncryptedObject;
 import com.milbar.logic.encryption.wrappers.data.RSAEncryptedObject;
 import com.milbar.logic.exceptions.EncryptionException;
+import com.milbar.logic.security.wrappers.Password;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.security.PublicKey;
 
-public interface Encryption {
+public interface EncryptionObject {
     
     /**
      * This method is using AES algorithm to encrypt given object and wrap it with AESEncryptedObject class,
@@ -25,7 +24,7 @@ public interface Encryption {
      *                             EncryptionException, with original or custom error message.
      */
     <E extends Serializable> AESEncryptedObject<E>
-    encryptObject(E object, char[] password, EncryptionBlockModeType blockModeType) throws EncryptionException;
+    encryptObject(E object, Password password, Mode blockModeType) throws EncryptionException;
     
     /**
      * This method is using RSA algorithm to encrypt given object and wrap it with RSAEncryptedObject class,
@@ -41,27 +40,5 @@ public interface Encryption {
      */
     <E extends Serializable> RSAEncryptedObject<E>
     encryptObject(E object, PublicKey publicKey) throws EncryptionException;
-    
-    /**
-     * This method is using AES algorithm to encrypt given input stream and write it to given output stream.
-     * Output stream contain serialized header with AESCipherFactory, that can be used for decryption.
-     * @param inputStream Input stream with data to encrypt.
-     * @param outputStream Output stream to which the data will be saved after encryption.
-     * @param password Password that will be used with PBEKeySpec for AES encryption.
-     * @param blockModeType Data block mode type, that will be used in AES algorithm.
-     * @throws EncryptionException If there is any error with encryption, then it's caught and thrown as
-     *                             EncryptionException, with original or custom error message.
-     */
-    void encryptStream(InputStream inputStream, OutputStream outputStream,
-                       char[] password, EncryptionBlockModeType blockModeType) throws EncryptionException;
-    
-    /**
-     * This method is using AES algorithm to encrypt given input stream and write it to given output stream.
-     * Output stream contains serialized header with RSACipherFactory, that can be used for decryption.
-     * @param inputStream Input stream with data to encrypt.
-     * @param outputStream Output stream to which the data will be saved after encryption.
-     * @param publicKey Public key used for encryption.
-     */
-    void encryptStream(InputStream inputStream, OutputStream outputStream, PublicKey publicKey) throws EncryptionException;
-    
+
 }

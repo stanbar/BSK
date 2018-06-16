@@ -1,5 +1,5 @@
-import com.milbar.logic.FileAndExtension;
 import com.milbar.logic.exceptions.IllegalFileNameException;
+import com.milbar.logic.security.FileAndExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

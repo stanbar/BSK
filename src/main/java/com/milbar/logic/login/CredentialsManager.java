@@ -45,11 +45,11 @@ public class CredentialsManager {
         return salt;
     }
     
-    public static byte[] getHash(final String password, final byte[] salt) throws ImplementationError {
+    public static byte[] getHash(final char[] password, final byte[] salt) throws ImplementationError {
         byte[] hash;
         try {
             SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-            PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, HASH_ITERATIONS, HASH_LENGTH_IN_BYTES * 8);
+            PBEKeySpec keySpec = new PBEKeySpec(password, salt, HASH_ITERATIONS, HASH_LENGTH_IN_BYTES * 8);
             hash = secretKeyFactory.generateSecret(keySpec).getEncoded();
         } catch (NoSuchAlgorithmException e) {
             logger.log(Level.SEVERE, e.getMessage());
@@ -62,7 +62,7 @@ public class CredentialsManager {
         return hash;
     }
     
-    public static boolean validatePassword(final String password, final byte[] salt, final byte[] hash) {
+    public static boolean validatePassword(final char[] password, final byte[] salt, final byte[] hash) {
         try {
             byte[] generatedHash = getHash(password, salt);
             return hashEquals(generatedHash, hash);

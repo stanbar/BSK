@@ -1,35 +1,38 @@
 package com.milbar.logic.login.wrappers;
 
 import com.milbar.gui.configuration.ApplicationConfiguration;
+import com.milbar.logic.abstracts.ArrayDestroyer;
 import com.milbar.logic.abstracts.Destroyable;
-import com.milbar.logic.encryption.wrappers.KeyAndSalt;
 
+import java.security.SecureRandom;
 import java.util.Date;
 
 public class SessionToken implements Destroyable {
     
     private final static long SESSION_LENGTH = ApplicationConfiguration.getSessionLength();
+    private final static int SESSION_KEY_LENGTH = 32;
     
-    private String username;
-    private KeyAndSalt usersEncryptionKey;
+    private UserCredentials userCredentials;
+    private byte[] sessionKey = new byte[SESSION_KEY_LENGTH];
     private Date sessionValidUntil;
     
-    public SessionToken(String username, KeyAndSalt usersEncryptionKey) {
-        this.username = username;
-        this.usersEncryptionKey = usersEncryptionKey;
+    public SessionToken(UserCredentials userCredentials) {
+        this.userCredentials = userCredentials;
+        SecureRandom secureRandom = new SecureRandom();
+        secureRandom.nextBytes(sessionKey);
         refresh();
     }
     
-    public String getUsername() {
-        return username;
+    public UserCredentials getUserCredentials() {
+        return userCredentials;
     }
     
-    public KeyAndSalt getUsersEncryptionKey() {
-        return usersEncryptionKey;
-    }
-    
-    public Date getValidDate() {
+    public Date getSessionValidUntil() {
         return sessionValidUntil;
+    }
+    
+    public byte[] getSessionKey() {
+        return sessionKey;
     }
     
     public void refresh() {
@@ -43,7 +46,9 @@ public class SessionToken implements Destroyable {
     }
     
     public void destroy() {
-        usersEncryptionKey.destroy();
-        this.username = null;
+        userCredentials = null;
+        ArrayDestroyer.destroy(sessionKey);
+        sessionValidUntil = new Date(0);
     }
+    
 }

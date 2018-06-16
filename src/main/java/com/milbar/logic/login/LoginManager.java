@@ -3,6 +3,7 @@ package com.milbar.logic.login;
 import com.milbar.gui.configuration.ApplicationConfiguration;
 import com.milbar.logic.exceptions.*;
 import com.milbar.logic.login.wrappers.SessionToken;
+import com.milbar.logic.security.wrappers.Password;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -10,12 +11,17 @@ import java.util.List;
 public class LoginManager {
     
     private final static Path USERS_DATA_PATH = ApplicationConfiguration.getUsersDataPath();
+    private final static Path USERS_PUBLIC_KEYS_PATH = ApplicationConfiguration.getUsersPublicKeysPath();
     
-    private UsersManager usersManager = new UsersManager(USERS_DATA_PATH);
+    private UsersManager usersManager;
     
     private SessionToken usersSession;
     
-    public SessionToken login(String username, String password) throws LoginException {
+    public LoginManager() throws InstanceInitializeException {
+        usersManager = new UsersManager(USERS_DATA_PATH, USERS_PUBLIC_KEYS_PATH);
+    }
+    
+    public SessionToken login(String username, Password password) throws LoginException {
         try {
             logout();
             usersSession = usersManager.loginUser(username, password);
@@ -32,20 +38,18 @@ public class LoginManager {
         }
     }
     
-    public void register(String username, String password) throws RegisterException {
+    public void register(String username, Password password) throws RegisterException {
         try {
-            if (!usersManager.registerUser(username, password))
-                throw new RegisterException("Failed to register user.");
+            usersManager.registerUser(username, password);
         } catch (UserAlreadyExists e) {
             throw new RegisterException(e.getMessage());
         }
     }
     
-    public void removeUser(String username, String password) throws RemoveUserException {
+    public void removeUser(String username, Password password) throws RemoveUserException {
         try {
-            if (!usersManager.removeUser(username, password))
-                throw new RemoveUserException("Failed to remove user.");
-        } catch (UserDoesNotExist e) {
+            usersManager.removeUser(username, password);
+        } catch (UserRemoveException e) {
             throw new RemoveUserException(e.getMessage());
         }
     }

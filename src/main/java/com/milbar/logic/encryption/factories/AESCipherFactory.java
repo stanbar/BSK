@@ -1,6 +1,6 @@
 package com.milbar.logic.encryption.factories;
 
-import com.milbar.logic.abstracts.EncryptionBlockModeType;
+import com.milbar.logic.abstracts.Mode;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -28,7 +28,9 @@ public class AESCipherFactory extends CipherFactory implements Serializable {
     private int keySize;
     private int iterationsAmount;
     
-    public AESCipherFactory(AlgorithmFactory algorithmFactory, EncryptionBlockModeType modeType) {
+    private String originalFileExtension = "";
+    
+    public AESCipherFactory(AlgorithmFactory algorithmFactory, Mode modeType) {
         AESFactory aesAlgorithmData = (AESFactory)algorithmFactory;
         
         SecureRandom random = new SecureRandom();
@@ -43,6 +45,11 @@ public class AESCipherFactory extends CipherFactory implements Serializable {
         this.keySalt = keySalt;
         keySize = aesAlgorithmData.getKeySize();
         iterationsAmount = aesAlgorithmData.getKeyHashIterationsAmount();
+    }
+    
+    public AESCipherFactory(AlgorithmFactory algorithmFactory, Mode modeType, String originalFileExtension) {
+        this(algorithmFactory, modeType);
+        this.originalFileExtension = originalFileExtension;
     }
     
     public Cipher getCipher(char[] password, int cipherMode) throws NoSuchPaddingException, NoSuchAlgorithmException,
@@ -92,4 +99,7 @@ public class AESCipherFactory extends CipherFactory implements Serializable {
         return iterationsAmount;
     }
     
+    public String getOriginalFileExtension() {
+        return originalFileExtension;
+    }
 }

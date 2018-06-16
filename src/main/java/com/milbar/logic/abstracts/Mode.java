@@ -1,20 +1,24 @@
 package com.milbar.logic.abstracts;
 
-/**
- * https://docs.oracle.com/javase/6/docs/technotes/guides/security/SunProviders.html
- */
+import java.util.function.Supplier;
 
-public enum Mode {
-    ECB("ElectronicCodebook", false),
-    CBC("CipherBlockChaining", true),
-    CFB("CipherFeedbackMode", true),
-    OFB("OutputFeedbackMode", true);
-
+public enum Mode implements Supplier<String> {
+    ECB("ECB", false),
+    CBC("CBC", true),
+    CFB("CFB", true),
+    OFB("OFB", true);
+    
     public String fullName;
     public boolean initVectorRequired;
-
+    
     Mode(String fullName, boolean initVectorRequired) {
         this.fullName = fullName;
         this.initVectorRequired = initVectorRequired;
+    }
+    
+    
+    @Override
+    public String get() {
+        return fullName;
     }
 }

@@ -12,7 +12,7 @@ public class RSAEncryptedObject<E extends Serializable> extends EncryptedObject<
     
     @Override
     public RSACipherFactory getCipherFactory() {
-        return (RSACipherFactory) cipherFactory;
+        return (RSACipherFactory)cipherFactory;
     }
 }
 

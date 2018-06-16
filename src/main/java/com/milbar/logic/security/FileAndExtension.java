@@ -1,4 +1,4 @@
-package com.milbar.logic;
+package com.milbar.logic.security;
 
 import com.milbar.logic.exceptions.IllegalFileExtensionException;
 import com.milbar.logic.exceptions.IllegalFileNameException;
