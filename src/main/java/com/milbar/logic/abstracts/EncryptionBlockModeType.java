@@ -1,6 +1,8 @@
 package com.milbar.logic.abstracts;
 
-public enum EncryptionBlockModeType {
+import java.util.function.Supplier;
+
+public enum EncryptionBlockModeType implements Supplier<String> {
     ECB("ECB", false),
     CBC("CBC", true),
     CFB("CFB", true),
@@ -15,4 +17,8 @@ public enum EncryptionBlockModeType {
     }
     
     
+    @Override
+    public String get() {
+        return fullName;
+    }
 }

@@ -1,44 +1,37 @@
 package com.milbar.logic.encryption.wrappers.data;
 
-import com.milbar.logic.encryption.cryptography.Decrypter;
-import com.milbar.logic.encryption.cryptography.Encrypter;
-import com.milbar.logic.exceptions.DecryptionException;
-import com.milbar.logic.exceptions.EncryptionException;
 
-import javax.crypto.Cipher;
+import com.milbar.logic.encryption.factories.CipherFactory;
+import org.apache.commons.lang3.SerializationUtils;
+
 import java.io.Serializable;
 
-public abstract class EncryptedObject <E extends Serializable> extends EncryptedData implements Serializable {
+public abstract class EncryptedObject<E extends Serializable> implements Serializable {
     
-    private E object;
     
-    EncryptedObject(E object, Cipher cipher) {
-        super(cipher);
-        this.object = object;
+    private byte[] serializedObject;
+    CipherFactory cipherFactory;
+    private boolean isEncrypted;
+    
+    public EncryptedObject(byte[] serializedObject, CipherFactory cipherFactory, boolean isEncrypted) {
+        this.serializedObject = serializedObject;
+        this.cipherFactory = cipherFactory;
+        this.isEncrypted = isEncrypted;
     }
     
-    void encryptObject() throws EncryptionException {
-        if (isEncrypted)
-            return;
-        
-        encrypter = new Encrypter(cipher);
-        object = encrypter.encrypt(object);
-        destroyEncrypter();
-        isEncrypted = true;
+    public E getOriginalObject(byte[] data) {
+        return (E)SerializationUtils.deserialize(data);
     }
     
-    void decryptObject() throws DecryptionException {
-        if (!isEncrypted)
-            return;
-        
-        decrypter = new Decrypter(cipher);
-        object = decrypter.decrypt(object);
-        destroyDecrypter();
-        isEncrypted = false;
+    public byte[] getSerializedObject() {
+        return serializedObject;
     }
     
-    public E getObject() {
-        return object;
+    public boolean isEncrypted() {
+        return isEncrypted;
     }
+    
+    public abstract CipherFactory getCipherFactory();
+    
     
 }
