@@ -2,8 +2,8 @@ package com.milbar.logic.security.wrappers;
 
 import com.milbar.logic.abstracts.Destroyable;
 import com.milbar.logic.abstracts.Mode;
+import com.milbar.logic.encryption.cryptography.CipherHeaderManager;
 import com.milbar.logic.encryption.factories.AESCipherFactory;
-import com.milbar.logic.encryption.factories.AESFactory;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -27,7 +27,7 @@ public class FileWithMetadata implements Destroyable {
     private FileWithMetadata(File fileInput, File fileOutput, String fileExtension, Password password, Mode mode, boolean encryption) {
         this.fileInput = fileInput;
         this.fileOutput = fileOutput;
-        this.fileExtension = FilenameUtils.getExtension(fileInput.getName());
+        this.fileExtension = fileExtension;
         this.encryption = encryption;
         this.password = password;
         this.mode = mode;
@@ -46,10 +46,10 @@ public class FileWithMetadata implements Destroyable {
     public static FileWithMetadata getDecryptionInstance(File fileInput, Path destination, Password password, Mode mode) throws IOException {
         String fileNameWithoutExt = getFilenameWithoutExt(fileInput);
         try (FileInputStream fileInputStream = new FileInputStream(fileInput)) {
-            AESCipherFactory aesCipherFactory = new AESCipherFactory(new AESFactory(), mode);
+            AESCipherFactory aesCipherFactory = CipherHeaderManager.readCipherData(fileInputStream);
             String fileExtension = aesCipherFactory.getOriginalFileExtension();
     
-            File fileOutput = Paths.get(destination.normalize().toString(), fileNameWithoutExt + fileExtension).toFile();
+            File fileOutput = Paths.get(destination.normalize().toString(), fileNameWithoutExt + "." + fileExtension).toFile();
             return new FileWithMetadata(fileInput, fileOutput, fileExtension, password, mode, false);
         }
     }

@@ -139,7 +139,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         }
     
         notEncryptedFilesSelected = selectedFilesForDecryption.size();
-        filesSelected = encryptedFilesSelected > 0;
+        filesSelected = notEncryptedFilesSelected > 0;
         logLabel.writeInfo("Selected " + encryptedFilesSelected + " files for decryption.");
         createFileJobsList();
     }

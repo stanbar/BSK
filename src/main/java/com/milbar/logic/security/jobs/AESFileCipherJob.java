@@ -68,7 +68,7 @@ public class AESFileCipherJob extends Task<Void> implements Destroyable, Progres
              FileOutputStream fileOutputStream = new FileOutputStream(fileWithMetadata.getFileOutput())) {
             
             EncryptionStream encryptionStream = new StreamCryptography(this, fileInputStream, fileOutputStream);
-            encryptionStream.encryptStream(fileWithMetadata.getPassword(), fileWithMetadata.getMode());
+            encryptionStream.encryptStream(fileWithMetadata.getFileExtension(), fileWithMetadata.getPassword(), fileWithMetadata.getMode());
             
             finished("Finished encryption");
             
