@@ -6,7 +6,9 @@ import com.milbar.logic.login.wrappers.SessionToken;
 import com.milbar.logic.security.wrappers.Password;
 
 import java.nio.file.Path;
+import java.security.PublicKey;
 import java.util.List;
+import java.util.Map;
 
 public class LoginManager {
     
@@ -56,6 +58,10 @@ public class LoginManager {
     
     public List<String> getUsersList() {
         return usersManager.getUsersList();
+    }
+    
+    public Map<String, PublicKey> getUsersPublicKeys() {
+        return usersManager.getUsersPublicKeys();
     }
     
     private boolean isLoggedIn() {

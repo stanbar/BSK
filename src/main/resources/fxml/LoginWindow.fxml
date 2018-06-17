@@ -12,7 +12,7 @@
                 <Font name="Times New Roman" size="28.0" />
             </font></Label>
         <TextField fx:id="usernameField" layoutX="98.0" layoutY="100.0" promptText="Username" />
-        <PasswordField fx:id="passwordField" layoutX="98.0" layoutY="137.0" onAction="#loginButtonClicked" onKeyReleased="#passwordEntered" promptText="Password" styleClass="text-field" />
+        <PasswordField fx:id="passwordField" layoutX="98.0" layoutY="137.0" onAction="#loginButtonClicked" promptText="Password" styleClass="text-field" />
         <Button layoutX="161.0" layoutY="198.0" mnemonicParsing="false" onAction="#loginButtonClicked" prefHeight="30.0" prefWidth="113.0" styleClass="button" stylesheets="@../css/LoginWindow.css" text="Log in" />
         <Button layoutX="67.0" layoutY="198.0" mnemonicParsing="false" onAction="#cancelButtonClicked" prefHeight="30.0" prefWidth="77.0" styleClass="button" stylesheets="@../css/LoginWindow.css" text="Cancel" />
         <Label fx:id="errorLabel" layoutX="73.0" layoutY="175.0" prefHeight="17.0" prefWidth="177.0" styleClass="error-label" stylesheets="@../css/LoginWindow.css" textAlignment="CENTER" textFill="#ff5300" />

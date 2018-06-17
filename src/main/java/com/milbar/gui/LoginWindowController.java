@@ -60,17 +60,6 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     }
     
     @FXML
-    public void userNameEntered() {
-        log.log(Level.INFO, "User entered username {0}", usernameField.getText());
-    }
-    
-    @FXML
-    public void passwordEntered() {
-        //todo delete this on release
-        log.log(Level.INFO, "User entered password {0}", passwordField.getText());
-    }
-    
-    @FXML
     public void cancelButtonClicked() {
         closeWindow();
     }
@@ -81,7 +70,6 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
             errorLabel.setText("Logging in is blocked right now.");
             return;
         }
-        refreshInputData();
         if (areCredentialsEntered()) {
             try {
                 handleUserLoginEvent(usernameField.getText(), passwordField.getText());
@@ -146,11 +134,6 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     
     private boolean areCredentialsEntered() {
         return usernameField.getLength() > 0 && passwordField.getLength() > 0;
-    }
-    
-    private void refreshInputData() {
-        userNameEntered();
-        passwordEntered();
     }
     
     public void setStage(Stage stage) {

@@ -10,6 +10,11 @@ public class Password implements Destroyable {
     public Password(char[] secret) {
         this.secret = secret;
     }
+    
+    public Password(byte[] secret) {
+        String string = new String(secret);
+        this.secret = string.toCharArray();
+    }
 
     public char[] getSecret() {
         return secret;

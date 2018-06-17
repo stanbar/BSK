@@ -1,6 +1,7 @@
 package com.milbar.logic.encryption.factories;
 
 import com.milbar.logic.abstracts.Mode;
+import com.milbar.logic.encryption.wrappers.data.AESKeyEncrypted;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -15,6 +16,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AESCipherFactory extends CipherFactory implements Serializable {
     
@@ -29,6 +32,8 @@ public class AESCipherFactory extends CipherFactory implements Serializable {
     private int iterationsAmount;
     
     private String originalFileExtension = "";
+    
+    private Map<String, AESKeyEncrypted> approvedUsersAndKeys = new HashMap<>();
     
     public AESCipherFactory(AlgorithmFactory algorithmFactory, Mode modeType) {
         AESFactory aesAlgorithmData = (AESFactory)algorithmFactory;
@@ -50,6 +55,11 @@ public class AESCipherFactory extends CipherFactory implements Serializable {
     public AESCipherFactory(AlgorithmFactory algorithmFactory, Mode modeType, String originalFileExtension) {
         this(algorithmFactory, modeType);
         this.originalFileExtension = originalFileExtension;
+    }
+    
+    public AESCipherFactory(AlgorithmFactory algorithmFactory, Map<String, AESKeyEncrypted> approvedUsers, Mode modeType, String originalFileExtension) {
+        this(algorithmFactory, modeType, originalFileExtension);
+        this.approvedUsersAndKeys = approvedUsers;
     }
     
     public Cipher getCipher(char[] password, int cipherMode) throws NoSuchPaddingException, NoSuchAlgorithmException,
@@ -101,5 +111,13 @@ public class AESCipherFactory extends CipherFactory implements Serializable {
     
     public String getOriginalFileExtension() {
         return originalFileExtension;
+    }
+    
+    public boolean isUserApproved(String name) {
+        return approvedUsersAndKeys.containsKey(name);
+    }
+    
+    public AESKeyEncrypted getUsersKey(String name) {
+        return approvedUsersAndKeys.get(name);
     }
 }

@@ -6,6 +6,9 @@ import com.milbar.gui.helpers.LogLabel;
 import com.milbar.gui.helpers.LoginController;
 import com.milbar.gui.helpers.TogglesHelper;
 import com.milbar.logic.abstracts.Mode;
+import com.milbar.logic.encryption.factories.RSACipherFactory;
+import com.milbar.logic.encryption.factories.RSAFactory;
+import com.milbar.logic.encryption.wrappers.data.AESKeyEncrypted;
 import com.milbar.logic.exceptions.IllegalEventSourceException;
 import com.milbar.logic.exceptions.InstanceInitializeException;
 import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
@@ -30,9 +33,17 @@ import javafx.stage.Stage;
 import org.apache.commons.lang.NotImplementedException;
 import org.controlsfx.control.ListSelectionView;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,9 +64,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     
     private Map<Mode, Toggle> modeToggleMap;
     private Map<Toggle, Mode> toggleModeMap;
-
-    @FXML
-    private ArrayList<RadioButton> encryptionModeList;
     
     private ExecutorService executor = Executors.newFixedThreadPool(THREADS_POOL_SIZE);
     private ObservableList<AESFileCipherJob> tableElementsList = FXCollections.observableArrayList();
@@ -108,7 +116,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     private void initializeFileChooser() {
         notEncryptedFilesChooser.setTitle("Select files to encrypt.");
         encryptedFilesChooser.setTitle("Select files to decrypt.");
-        //notEncryptedFilesChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JPG images", "*.jpg"));
+        encryptedFilesChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Encrypted files", "*.enc"));
     }
 
     @FXML
@@ -144,18 +152,70 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         createFileJobsList();
     }
 
-    private void selectToggleMode(Mode mode) {
-        //modeToggleGroup.selectToggle(modeToggleMap.get(mode));
-        modeToggleMap.get(mode).setSelected(true);
-    }
-    
     @FXML
     public void startButtonClicked() {
-        createFileJobsList();
+        Map<String, PublicKey> usersPublicKeys = loginManager.getUsersPublicKeys();
+        Set<String> selectedUsersList = new HashSet<>(selectedUsers.getTargetItems());
+        if (selectedUsersList.size() != 0) {
+            SecureRandom secureRandom = new SecureRandom();
+            byte[] sessionKey = new byte[32];
+            secureRandom.nextBytes(sessionKey);
+            Map<String, AESKeyEncrypted> approvedUsers = prepareApprovedUsers(usersPublicKeys, selectedUsersList, sessionKey);
+            createFileJobsList(approvedUsers, new Password(sessionKey));
+        }
+        else
+            createFileJobsList();
+    
         tableElementsList.forEach(job -> executor.submit(job));
     }
     
+    private Map<String, AESKeyEncrypted> prepareApprovedUsers(Map<String, PublicKey> usersPublicKeys,
+                                                              Set<String> selectedUsersList, byte[] sessionKey) {
+        Map<String, PublicKey> approvedUsers = new HashMap<>();
+        PublicKey myPublicKey = loginController.getSessionToken().getUserCredentials().getPublicKey();
+        approvedUsers.put(loginController.getUserCredentials().getUsername(), myPublicKey);
+        usersPublicKeys.forEach((user, key) -> {
+            if (selectedUsersList.contains(user))
+                approvedUsers.put(user, key);
+        });
+        return getApprovedUsersKeysEncrypted(approvedUsers, sessionKey);
+    }
+    
+    private Map<String, AESKeyEncrypted> getApprovedUsersKeysEncrypted(Map<String, PublicKey> approvedUsers, byte[] sessionKey) {
+        
+        Map<String, AESKeyEncrypted> approvedUsersKeys = new HashMap<>();
+        StringBuilder stringBuilder = new StringBuilder();
+        
+        RSACipherFactory rsaCipherFactory = new RSACipherFactory(new RSAFactory());
+        for (Map.Entry<String, PublicKey> entry : approvedUsers.entrySet()) {
+            String user = entry.getKey();
+            PublicKey key = entry.getValue();
+            try {
+                Cipher cipher = rsaCipherFactory.getEncryptCipher(key);
+                byte[] encrypted = cipher.doFinal(sessionKey);
+                approvedUsersKeys.put(user, new AESKeyEncrypted(encrypted));
+            } catch (NoSuchPaddingException | NoSuchAlgorithmException | BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
+                stringBuilder.append(user).append(", ");
+            }
+        }
+        if (stringBuilder.length() != 0)
+            logLabel.writeError("Failed to approve users: " + stringBuilder.toString());
+        
+        return approvedUsersKeys;
+    }
+    
     private void createFileJobsList() {
+        Map<String, AESKeyEncrypted> noOneIsApproved = new HashMap<>();
+        Password password = new Password(loginController.getSessionToken().getSessionKey());
+        createFileJobsList(noOneIsApproved, password, password);
+    }
+    
+    private void createFileJobsList(Map<String, AESKeyEncrypted> approvedUsers, Password encryptPassword) {
+        Password decryptPassword = new Password(loginController.getSessionToken().getSessionKey());
+        createFileJobsList(approvedUsers, encryptPassword, decryptPassword);
+    }
+    
+    private void createFileJobsList(Map<String, AESKeyEncrypted> approvedUsers, Password encryptPassword, Password decryptPassword) {
         if (!loginController.isLoggedIn()) {
             logLabel.writeError("You are not logged in!");
             return;
@@ -165,27 +225,22 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         }
     
         tableElementsList.clear();
-        Password password = new Password(loginController.getSessionToken().getSessionKey());
         Path currentUserPath = getCurrentUsersPath();
     
         selectedFilesForEncryption.forEach(file -> {
-            tableElementsList.add(prepareEncryptionFileCipherJob(file, currentUserPath, password, selectedBlockEncryptionMode));
+            tableElementsList.add(prepareEncryptionFileCipherJob(file, currentUserPath, encryptPassword, approvedUsers, selectedBlockEncryptionMode));
         });
     
         selectedFilesForDecryption.forEach(file -> {
-            tableElementsList.add(prepareDecryptionFileCipherJob(file, currentUserPath, password, selectedBlockEncryptionMode));
+            tableElementsList.add(prepareDecryptionFileCipherJob(file, currentUserPath, decryptPassword, selectedBlockEncryptionMode));
         });
 
-//            List<String> selectedUsersList = selectedUsers.getTargetItems();
-//            selectedUsersList.forEach(selectedUser -> {
-//                addJobToTable(sessionToken, selectedUser);
-//            });
-        
         refreshTable();
     }
     
-    private AESFileCipherJob prepareEncryptionFileCipherJob(File file, Path currentUserPath, Password password, Mode mode) {
-        FileWithMetadata fileWithMetadata = FileWithMetadata.getEncryptionInstance(file, currentUserPath, password, mode);
+    private AESFileCipherJob prepareEncryptionFileCipherJob(File file, Path currentUserPath, Password password,
+                                                            Map<String, AESKeyEncrypted> approvedUsers, Mode mode) {
+        FileWithMetadata fileWithMetadata = FileWithMetadata.getEncryptionInstance(file, currentUserPath, password, approvedUsers, mode);
         return new AESFileCipherJob(fileWithMetadata);
     }
     

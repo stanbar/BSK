@@ -114,4 +114,8 @@ public class UsersManager {
     public List<String> getUsersList() {
         return usersCollection.getKeysList();
     }
+    
+    public Map<String, PublicKey> getUsersPublicKeys() {
+        return usersPublicKeys.getCollection();
+    }
 }

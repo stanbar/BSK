@@ -5,6 +5,7 @@ import com.milbar.logic.encryption.factories.AESCipherFactory;
 import com.milbar.logic.encryption.factories.AESFactory;
 import com.milbar.logic.encryption.factories.RSACipherFactory;
 import com.milbar.logic.encryption.factories.RSAFactory;
+import com.milbar.logic.encryption.wrappers.data.AESKeyEncrypted;
 import com.milbar.logic.exceptions.DecryptionException;
 import com.milbar.logic.exceptions.EncryptionException;
 import com.milbar.logic.security.wrappers.Password;
@@ -19,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Map;
 
 public class StreamCryptography implements EncryptionStream, DecryptionStream {
     
@@ -54,10 +56,10 @@ public class StreamCryptography implements EncryptionStream, DecryptionStream {
     }
     
     @Override
-    public void encryptStream(String fileExtension, Password password, Mode blockModeType) throws EncryptionException {
+    public void encryptStream(String fileExtension, Password password, Map<String, AESKeyEncrypted> approvedUsers, Mode blockModeType) throws EncryptionException {
         AESFactory aesAlgorithmData = new AESFactory();
         AESCipherFactory aesCipherFactory =
-                new AESCipherFactory(aesAlgorithmData, blockModeType, fileExtension);
+                new AESCipherFactory(aesAlgorithmData, approvedUsers, blockModeType, fileExtension);
         
         encryptAESStream(password, aesCipherFactory);
     }

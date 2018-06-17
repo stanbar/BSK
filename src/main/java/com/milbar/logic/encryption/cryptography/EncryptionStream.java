@@ -1,10 +1,12 @@
 package com.milbar.logic.encryption.cryptography;
 
 import com.milbar.logic.abstracts.Mode;
+import com.milbar.logic.encryption.wrappers.data.AESKeyEncrypted;
 import com.milbar.logic.exceptions.EncryptionException;
 import com.milbar.logic.security.wrappers.Password;
 
 import java.security.PublicKey;
+import java.util.Map;
 
 public interface EncryptionStream {
     
@@ -32,6 +34,6 @@ public interface EncryptionStream {
      * @param blockModeType
      * @throws EncryptionException
      */
-    void encryptStream(String fileExtension, Password password, Mode blockModeType) throws EncryptionException;
+    void encryptStream(String fileExtension, Password password, Map<String ,AESKeyEncrypted> approvedUsers, Mode blockModeType) throws EncryptionException;
     
 }

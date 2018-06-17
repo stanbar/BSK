@@ -4,6 +4,7 @@ import com.milbar.logic.abstracts.Destroyable;
 import com.milbar.logic.encryption.cryptography.DecryptionStream;
 import com.milbar.logic.encryption.cryptography.EncryptionStream;
 import com.milbar.logic.encryption.cryptography.StreamCryptography;
+import com.milbar.logic.encryption.wrappers.data.AESKeyEncrypted;
 import com.milbar.logic.exceptions.DecryptionException;
 import com.milbar.logic.exceptions.EncryptionException;
 import com.milbar.logic.security.wrappers.FileWithMetadata;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 public class AESFileCipherJob extends Task<Void> implements Destroyable, ProgressListener {
     
@@ -68,7 +70,8 @@ public class AESFileCipherJob extends Task<Void> implements Destroyable, Progres
              FileOutputStream fileOutputStream = new FileOutputStream(fileWithMetadata.getFileOutput())) {
             
             EncryptionStream encryptionStream = new StreamCryptography(this, fileInputStream, fileOutputStream);
-            encryptionStream.encryptStream(fileWithMetadata.getFileExtension(), fileWithMetadata.getPassword(), fileWithMetadata.getMode());
+            Map<String ,AESKeyEncrypted> approvedUsers = fileWithMetadata.getApprovedUsers();
+            encryptionStream.encryptStream(fileWithMetadata.getFileExtension(), fileWithMetadata.getPassword(), approvedUsers, fileWithMetadata.getMode());
             
             finished("Finished encryption");
             
