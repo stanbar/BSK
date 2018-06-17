@@ -6,6 +6,8 @@ import com.milbar.gui.helpers.LogLabel;
 import com.milbar.gui.helpers.LoginController;
 import com.milbar.gui.helpers.TogglesHelper;
 import com.milbar.logic.abstracts.Mode;
+import com.milbar.logic.encryption.cryptography.CipherHeaderManager;
+import com.milbar.logic.encryption.factories.AESCipherFactory;
 import com.milbar.logic.encryption.factories.RSACipherFactory;
 import com.milbar.logic.encryption.factories.RSAFactory;
 import com.milbar.logic.encryption.wrappers.data.AESKeyEncrypted;
@@ -38,12 +40,10 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -231,10 +231,29 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
             tableElementsList.add(prepareEncryptionFileCipherJob(file, currentUserPath, encryptPassword, approvedUsers, selectedBlockEncryptionMode));
         });
     
-        selectedFilesForDecryption.forEach(file -> {
-            tableElementsList.add(prepareDecryptionFileCipherJob(file, currentUserPath, decryptPassword, selectedBlockEncryptionMode));
-        });
-
+        String username = loginController.getUserCredentials().getUsername();
+        PrivateKey privateKey = loginController.getUserCredentials().getPrivateKey();
+        
+        for (File file : selectedFilesForDecryption) {
+            
+            try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                AESCipherFactory aesCipherFactory = CipherHeaderManager.readCipherData(fileInputStream);
+                AESKeyEncrypted aesKeyEncrypted = aesCipherFactory.getUsersKey(username);
+                
+                if (aesKeyEncrypted != null) {
+                    RSACipherFactory rsaCipherFactory = new RSACipherFactory(new RSAFactory());
+                    Cipher cipherRSA = rsaCipherFactory.getDecryptCipher(privateKey);
+                    Password aesPassword = new Password(cipherRSA.doFinal(aesKeyEncrypted.getKeyBytes()));
+                    tableElementsList.add(prepareDecryptionFileCipherJob(file, currentUserPath, aesPassword));
+                }
+                else
+                    tableElementsList.add(prepareDecryptionFileCipherJob(file, currentUserPath, decryptPassword));
+                
+            } catch (IOException | BadPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException e) {
+                tableElementsList.add(prepareDecryptionFileCipherJob(file, currentUserPath, decryptPassword));
+            }
+        }
+    
         refreshTable();
     }
     
@@ -244,9 +263,9 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         return new AESFileCipherJob(fileWithMetadata);
     }
     
-    private AESFileCipherJob prepareDecryptionFileCipherJob(File file, Path currentUserPath, Password password, Mode mode) {
+    private AESFileCipherJob prepareDecryptionFileCipherJob(File file, Path currentUserPath, Password password) {
         try {
-            FileWithMetadata fileWithMetadata = FileWithMetadata.getDecryptionInstance(file, currentUserPath, password, mode);
+            FileWithMetadata fileWithMetadata = FileWithMetadata.getDecryptionInstance(file, currentUserPath, password);
             return new AESFileCipherJob(fileWithMetadata);
         } catch (IOException e) {
             logLabel.writeError("Failed to read file header " + file.getName());

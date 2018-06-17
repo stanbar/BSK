@@ -49,14 +49,14 @@ public class FileWithMetadata implements Destroyable {
         return new FileWithMetadata(fileInput, fileOutput, fileExtension, password, approvedUsers, mode, true);
     }
     
-    public static FileWithMetadata getDecryptionInstance(File fileInput, Path destination, Password password, Mode mode) throws IOException {
+    public static FileWithMetadata getDecryptionInstance(File fileInput, Path destination, Password password) throws IOException {
         String fileNameWithoutExt = getFilenameWithoutExt(fileInput);
         try (FileInputStream fileInputStream = new FileInputStream(fileInput)) {
             AESCipherFactory aesCipherFactory = CipherHeaderManager.readCipherData(fileInputStream);
             String fileExtension = aesCipherFactory.getOriginalFileExtension();
     
             File fileOutput = Paths.get(destination.normalize().toString(), fileNameWithoutExt + "." + fileExtension).toFile();
-            return new FileWithMetadata(fileInput, fileOutput, fileExtension, password, null, mode, false);
+            return new FileWithMetadata(fileInput, fileOutput, fileExtension, password, null, null, false);
         }
     }
     

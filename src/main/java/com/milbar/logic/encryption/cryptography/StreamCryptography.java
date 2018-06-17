@@ -117,7 +117,7 @@ public class StreamCryptography implements EncryptionStream, DecryptionStream {
     }
     
     private void decryptStream(Cipher cipher) throws IOException {
-        jobToUpdateProgress.onStatusChanged("Encrypting..");
+        jobToUpdateProgress.onStatusChanged("Decrypting..");
         try (CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, cipher);
              ProgressInputStream progressInputStream = new ProgressInputStream(inputStream, jobToUpdateProgress, inputStream.available())) {
     
