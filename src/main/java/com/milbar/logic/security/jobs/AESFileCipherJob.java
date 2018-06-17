@@ -8,8 +8,7 @@ import com.milbar.logic.exceptions.DecryptionException;
 import com.milbar.logic.exceptions.EncryptionException;
 import com.milbar.logic.security.wrappers.FileWithMetadata;
 import com.milbar.logic.security.wrappers.ProgressListener;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
 
@@ -18,11 +17,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class AESFileCipherJob extends Task implements Destroyable, ProgressListener {
+public class AESFileCipherJob extends Task<Void> implements Destroyable, ProgressListener {
     
     private final SimpleStringProperty fileName = new SimpleStringProperty();
     private final SimpleStringProperty status = new SimpleStringProperty();
-    private final DoubleProperty progress = new SimpleDoubleProperty();
     
     private FileWithMetadata fileWithMetadata;
     
@@ -43,6 +41,7 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
     
     public AESFileCipherJob(FileWithMetadata fileWithMetadata) {
         this.fileWithMetadata = fileWithMetadata;
+        updateProgressValue(-1, 1);
     }
     
     public static AESFileCipherJob getFailedInstance() {
@@ -50,7 +49,7 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
     }
     
     @Override
-    public Object call() {
+    public Void call() {
         if (isFailed)
             return null;
         
@@ -62,6 +61,7 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
         finished = true;
         return null;
     }
+    
     
     private void encryptFile() {
         try (FileInputStream fileInputStream = new FileInputStream(fileWithMetadata.getFileInput());
@@ -99,12 +99,12 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
         streamReadProgress = 0;
         totalStreamSize = 0;
         status.set(msg);
-        progress.set(0.0);
+        updateProgressValue(0, 1);
     }
     
     private void finished(String msg) {
         status.set(msg);
-        progress.set(100.0);
+        updateProgressValue(1, 1);
     }
     
     public File getFile() {
@@ -115,10 +115,6 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
         return status;
     }
 
-    public DoubleProperty getProgressProperty() {
-        return progress;
-    }
-    
     @Override
     public void destroy() {
         fileWithMetadata.destroy();
@@ -133,10 +129,21 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
     public void onProgressChanged(long change) {
         long delta = change - streamReadProgress;
         streamReadProgress += delta;
-        progress.set(streamReadProgress / totalStreamSize);
+        updateProgressValue(streamReadProgress, totalStreamSize);
+    }
+    
+    @Override
+    public void onStatusChanged(String msg) {
+        status.set(msg);
     }
     
     public boolean isFinished() {
         return finished;
+    }
+    
+    private void updateProgressValue(long newValue, long total) {
+        Platform.runLater(() -> {
+            this.updateProgress(newValue, total);
+        });
     }
 }

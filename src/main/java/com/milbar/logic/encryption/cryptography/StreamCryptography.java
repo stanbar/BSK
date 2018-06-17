@@ -41,6 +41,7 @@ public class StreamCryptography implements EncryptionStream, DecryptionStream {
     
     @Override
     public void encryptStream(PublicKey publicKey) throws EncryptionException {
+        jobToUpdateProgress.onStatusChanged("Generating cipher..");
         RSACipherFactory cipherFactory = new RSACipherFactory(new RSAFactory());
         try {
             Cipher cipher = cipherFactory.getEncryptCipher(publicKey);
@@ -63,6 +64,7 @@ public class StreamCryptography implements EncryptionStream, DecryptionStream {
     
     private void encryptAESStream(Password password, AESCipherFactory aesCipherFactory) throws EncryptionException {
         try {
+            jobToUpdateProgress.onStatusChanged("Generating cipher..");
             Cipher cipher = aesCipherFactory.getCipher(password.getSecret(), Cipher.ENCRYPT_MODE);
             CipherHeaderManager.writeCipherData(aesCipherFactory, outputStream);
             
@@ -73,10 +75,12 @@ public class StreamCryptography implements EncryptionStream, DecryptionStream {
     }
     
     private void encryptStream(Cipher cipher) throws IOException {
+        jobToUpdateProgress.onStatusChanged("Encrypting..");
         try (CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, cipher);
              ProgressInputStream progressInputStream = new ProgressInputStream(inputStream, jobToUpdateProgress, inputStream.available())) {
             
             progressInputStream.transferTo(cipherOutputStream);
+            jobToUpdateProgress.onStatusChanged("Finished encryption");
         }
     }
     
@@ -90,6 +94,7 @@ public class StreamCryptography implements EncryptionStream, DecryptionStream {
     }
     
     private void decryptAESStream(Password password) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException {
+        jobToUpdateProgress.onStatusChanged("Reading header..");
         AESCipherFactory aesCipherFactory = CipherHeaderManager.readCipherData(inputStream);
         Cipher cipher = aesCipherFactory.getCipher(password.getSecret(), Cipher.DECRYPT_MODE);
         decryptStream(cipher);
@@ -98,7 +103,9 @@ public class StreamCryptography implements EncryptionStream, DecryptionStream {
     @Override
     public void decryptStream(PrivateKey privateKey) throws DecryptionException {
         try {
+            jobToUpdateProgress.onStatusChanged("Reading header..");
             RSACipherFactory rsaCipherFactory = CipherHeaderManager.readCipherData(inputStream);
+            jobToUpdateProgress.onStatusChanged("Generating cipher..");
             Cipher cipher = rsaCipherFactory.getDecryptCipher(privateKey);
     
             decryptStream(cipher);
@@ -108,10 +115,12 @@ public class StreamCryptography implements EncryptionStream, DecryptionStream {
     }
     
     private void decryptStream(Cipher cipher) throws IOException {
+        jobToUpdateProgress.onStatusChanged("Encrypting..");
         try (CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, cipher);
              ProgressInputStream progressInputStream = new ProgressInputStream(inputStream, jobToUpdateProgress, inputStream.available())) {
     
             progressInputStream.transferTo(cipherOutputStream);
+            jobToUpdateProgress.onStatusChanged("Finished encryption");
         }
     }
     

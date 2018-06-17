@@ -6,4 +6,5 @@ public interface ProgressListener {
 
     void onProgressChanged(long change);
     
+    void onStatusChanged(String msg);
 }

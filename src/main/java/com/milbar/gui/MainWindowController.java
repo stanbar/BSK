@@ -24,6 +24,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ProgressBarTableCell;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.lang.NotImplementedException;
@@ -59,8 +60,8 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     private ExecutorService executor = Executors.newFixedThreadPool(THREADS_POOL_SIZE);
     private ObservableList<AESFileCipherJob> tableElementsList = FXCollections.observableArrayList();
     private Mode selectedBlockEncryptionMode = DEFAULT_BLOCK_ENCRYPTION_MODE;
-    private List<File> selectedFilesForEncryption = new ArrayList<>();
-    private List<File> selectedFilesForDecryption = new ArrayList<>();
+    private List<File> selectedFilesForEncryption = FXCollections.observableArrayList();
+    private List<File> selectedFilesForDecryption = FXCollections.observableArrayList();
     private boolean filesSelected = false;
     private int notEncryptedFilesSelected = -1;
     private int encryptedFilesSelected = -1;
@@ -152,29 +153,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     public void startButtonClicked() {
         createFileJobsList();
         tableElementsList.forEach(job -> executor.submit(job));
-        Thread thread = new Thread(() -> {
-            try {
-                waitForJobToFinish();
-                refreshJobsStatus();
-            } catch (InterruptedException ignored) {
-            
-            }
-        });
-    }
-    
-    private void refreshJobsStatus() {
-        // todo
-    }
-    
-    private void waitForJobToFinish() throws InterruptedException {
-        int counter = 0;
-        while (counter != tableElementsList.size()) {
-            for (AESFileCipherJob job : tableElementsList) {
-                if (job.isFinished())
-                    counter++;
-            }
-        }
-        Thread.sleep(100);
     }
     
     private void createFileJobsList() {
@@ -227,18 +205,14 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     }
     
     private void refreshTable() {
-
         fileNameColumn.setCellValueFactory( // file name
                 cell -> new SimpleStringProperty(cell.getValue().getFile().getName()));
 
         statusColumn.setCellValueFactory( // status information
                 cell -> cell.getValue().getStatusProperty());
 
-        progressColumn.setCellFactory( // javafx add progress bar
-                ProgressBarTableCell.forTableColumn());
-
-        progressColumn.setCellValueFactory( // linking progress bar
-                cell -> cell.getValue().getProgressProperty().asObject());
+        progressColumn.setCellFactory(ProgressBarTableCell.forTableColumn());
+        progressColumn.setCellValueFactory(new PropertyValueFactory<>("progress"));
 
         
         filesTable.setItems(tableElementsList);
@@ -339,8 +313,9 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     
     @FXML
     public void clearListButtonClicked() {
-        tableElementsList.clear();
-        selectedFilesForEncryption.clear();
-        selectedFilesForDecryption.clear();
+        tableElementsList = FXCollections.observableArrayList();
+        selectedFilesForEncryption = FXCollections.observableArrayList();
+        selectedFilesForDecryption = FXCollections.observableArrayList();
+        refreshTable();
     }
 }

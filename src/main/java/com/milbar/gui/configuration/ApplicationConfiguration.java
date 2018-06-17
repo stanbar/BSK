@@ -5,7 +5,9 @@ import java.nio.file.Paths;
 
 public abstract class ApplicationConfiguration {
     
-    private static String APPLICATION_PATH = initializeApplicationPath();
+    //private static String APPLICATION_PATH = initializeApplicationPath();
+    private static String APPLICATION_PATH = "D:\\Work";
+
     private static String DATA_PATH = "data";
     private static String USERS_DATA_FILENAME = "users.dat";
     private static String PUBLIC_KEYS_FILENAME = "usersPublicKeys.dat";

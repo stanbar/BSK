@@ -11,7 +11,7 @@ public class AESFactory extends AlgorithmFactory {
     private final static String HASH_ALGORITHM_NAME = "PBKDF2WithHmacSHA1";
     
     private final static int KEY_SIZE = 256;
-    private final static int KEY_HASH_ITERATIONS_AMOUNT = 4096;
+    private final static int KEY_HASH_ITERATIONS_AMOUNT = 65536;
 
     @Override
     public String getAlgorithmName() {
