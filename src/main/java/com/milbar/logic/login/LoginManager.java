@@ -46,13 +46,13 @@ public class LoginManager {
         }
     }
     
-    public void removeUser(String username, Password password) throws RemoveUserException {
-        try {
-            usersManager.removeUser(username, password);
-        } catch (UserRemoveException e) {
-            throw new RemoveUserException(e.getMessage());
-        }
-    }
+//    public void removeUser(String username, Password password) throws RemoveUserException {
+//        try {
+//            usersManager.removeUser(username, password);
+//        } catch (UserRemoveException e) {
+//            throw new RemoveUserException(e.getMessage());
+//        }
+//    }
     
     public List<String> getUsersList() {
         return usersManager.getUsersList();

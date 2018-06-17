@@ -1,18 +1,16 @@
 package com.milbar.logic.security.jobs;
 
 import com.milbar.logic.abstracts.Destroyable;
-import com.milbar.logic.abstracts.Mode;
 import com.milbar.logic.encryption.cryptography.DecryptionStream;
 import com.milbar.logic.encryption.cryptography.EncryptionStream;
 import com.milbar.logic.encryption.cryptography.StreamCryptography;
 import com.milbar.logic.exceptions.DecryptionException;
 import com.milbar.logic.exceptions.EncryptionException;
-import com.milbar.logic.security.FileCryptography;
-import com.milbar.logic.security.FileForDecryption;
-import com.milbar.logic.security.FileForEncryption;
-import com.milbar.logic.security.wrappers.Password;
+import com.milbar.logic.security.wrappers.FileWithMetadata;
 import com.milbar.logic.security.wrappers.ProgressListener;
-import javafx.beans.property.*;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.concurrent.Task;
 
 import java.io.File;
@@ -22,50 +20,55 @@ import java.io.IOException;
 
 public class AESFileCipherJob extends Task implements Destroyable, ProgressListener {
     
+    private final SimpleStringProperty fileName = new SimpleStringProperty();
     private final SimpleStringProperty status = new SimpleStringProperty();
     private final DoubleProperty progress = new SimpleDoubleProperty();
-    private final BooleanProperty isEncryptedCheckbox = new SimpleBooleanProperty(false);
     
-    private File file;
-    private final FileCryptography fileCryptography;
-    private Password sessionKey;
-    private Mode blockMode;
+    private FileWithMetadata fileWithMetadata;
     
     private long totalStreamSize = 0;
     private long streamReadProgress = 0;
 
-    public AESFileCipherJob(FileForEncryption fileForEncryption, Password sessionKey, Mode blockMode) {
-        this.file = fileForEncryption.getFileInput();
-        this.fileCryptography = fileForEncryption;
-        this.sessionKey = sessionKey;
-        this.blockMode = blockMode;
-        reset("Waiting..");
+    private boolean isFailed = false;
+    private boolean finished = false;
+    
+    private AESFileCipherJob(long size, long progress, String msg) {
+        this.totalStreamSize = size;
+        this.streamReadProgress = progress;
+        onProgressChanged(progress);
+        status.set(msg);
+        isFailed = true;
+        finished = true;
     }
     
-    public AESFileCipherJob(FileForDecryption fileForDecryption, Password sessionKey) {
-        this.file = fileForDecryption.getFileInput();
-        this.sessionKey = sessionKey;
-        this.fileCryptography = fileForDecryption;
-        reset("Waiting..");
+    public AESFileCipherJob(FileWithMetadata fileWithMetadata) {
+        this.fileWithMetadata = fileWithMetadata;
     }
-
+    
+    public static AESFileCipherJob getFailedInstance() {
+        return new AESFileCipherJob(1, 1, "Failed");
+    }
+    
     @Override
     public Object call() {
+        if (isFailed)
+            return null;
         
-        if (fileCryptography.isEncryption())
+        if (fileWithMetadata.isEncryption())
             encryptFile();
         else
             decryptFile();
-        
+    
+        finished = true;
         return null;
     }
     
     private void encryptFile() {
-        try (FileInputStream fileInputStream = new FileInputStream(fileCryptography.getFileInput());
-             FileOutputStream fileOutputStream = new FileOutputStream(fileCryptography.getFileOutput())) {
+        try (FileInputStream fileInputStream = new FileInputStream(fileWithMetadata.getFileInput());
+             FileOutputStream fileOutputStream = new FileOutputStream(fileWithMetadata.getFileOutput())) {
             
             EncryptionStream encryptionStream = new StreamCryptography(this, fileInputStream, fileOutputStream);
-            encryptionStream.encryptStream(sessionKey, blockMode);
+            encryptionStream.encryptStream(fileWithMetadata.getPassword(), fileWithMetadata.getMode());
             
             finished("Finished encryption");
             
@@ -75,11 +78,11 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
     }
     
     private void decryptFile() {
-        try (FileInputStream fileInputStream = new FileInputStream(fileCryptography.getFileInput());
-             FileOutputStream fileOutputStream = new FileOutputStream(fileCryptography.getFileOutput())) {
+        try (FileInputStream fileInputStream = new FileInputStream(fileWithMetadata.getFileInput());
+             FileOutputStream fileOutputStream = new FileOutputStream(fileWithMetadata.getFileOutput())) {
     
             DecryptionStream encryptionStream  = new StreamCryptography(this, fileInputStream, fileOutputStream);
-            encryptionStream.decryptStream(sessionKey);
+            encryptionStream.decryptStream(fileWithMetadata.getPassword());
     
             finished("Finished decryption");
     
@@ -88,6 +91,10 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
         }
     }
 
+    public void reset() {
+        reset("Waiting..");
+    }
+    
     private void reset(String msg) {
         streamReadProgress = 0;
         totalStreamSize = 0;
@@ -101,7 +108,7 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
     }
     
     public File getFile() {
-        return file;
+        return fileWithMetadata.getFileInput();
     }
 
     public SimpleStringProperty getStatusProperty() {
@@ -114,7 +121,7 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
     
     @Override
     public void destroy() {
-        sessionKey.destroy();
+        fileWithMetadata.destroy();
     }
     
     @Override
@@ -124,7 +131,12 @@ public class AESFileCipherJob extends Task implements Destroyable, ProgressListe
     
     @Override
     public void onProgressChanged(long change) {
-        streamReadProgress += change;
+        long delta = change - streamReadProgress;
+        streamReadProgress += delta;
         progress.set(streamReadProgress / totalStreamSize);
+    }
+    
+    public boolean isFinished() {
+        return finished;
     }
 }

@@ -44,19 +44,23 @@ public class SerializedDataReader <K, V> {
              ObjectOutputStream objectStream = new ObjectOutputStream(fileStream)) {
             
             objectStream.writeObject(serializedCollection);
-            
+            isCollectionUpToDate = false;
         } catch (IOException e) {
             logger.log(Level.SEVERE, e.getMessage());
             throw new WritingSerializedFileException("Failed to write to file collection");
         }
     }
     
+    public List<K> getKeysList() {
+        return new ArrayList<>(getCollection().keySet());
+    }
+    
     public Map<K, V> getCollection() {
         if (!isCollectionUpToDate) {
             try {
                 readFromFile();
-            } catch (ReadingSerializedFileException ignore) {
-            
+            } catch (ReadingSerializedFileException e) {
+                e.printStackTrace();
             }
         }
         return serializedCollection;
@@ -93,8 +97,5 @@ public class SerializedDataReader <K, V> {
         else
             return false;
     }
-    
-    public List<K> getKeysList() {
-        return new ArrayList<>(serializedCollection.keySet());
-    }
+
 }

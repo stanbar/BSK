@@ -1,16 +1,19 @@
 package com.milbar.gui;
 
 import com.milbar.gui.abstracts.factories.LoggerFactory;
+import com.milbar.gui.configuration.ApplicationConfiguration;
 import com.milbar.gui.helpers.LogLabel;
 import com.milbar.gui.helpers.LoginController;
 import com.milbar.gui.helpers.TogglesHelper;
-import com.milbar.logic.abstracts.Algorithm;
 import com.milbar.logic.abstracts.Mode;
 import com.milbar.logic.exceptions.IllegalEventSourceException;
+import com.milbar.logic.exceptions.InstanceInitializeException;
 import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
+import com.milbar.logic.login.LoginManager;
 import com.milbar.logic.login.wrappers.SessionToken;
 import com.milbar.logic.security.jobs.AESFileCipherJob;
-import javafx.beans.property.SimpleObjectProperty;
+import com.milbar.logic.security.wrappers.FileWithMetadata;
+import com.milbar.logic.security.wrappers.Password;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,19 +23,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.ProgressBarTableCell;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.lang.NotImplementedException;
+import org.controlsfx.control.ListSelectionView;
 
-import javax.crypto.KeyGenerator;
 import java.io.File;
 import java.io.IOException;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,7 +44,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     
     private final static int THREADS_POOL_SIZE = 4;
     private final static Mode DEFAULT_BLOCK_ENCRYPTION_MODE = Mode.ECB;
-    private final static Algorithm DEFAULT_ENCRYPTION_ALGORITHM = Algorithm.DES;
 
     @FXML
     public ToggleGroup modeToggleGroup;
@@ -56,36 +54,24 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     private Map<Toggle, Mode> toggleModeMap;
 
     @FXML
-    public ToggleGroup algorithmToggleGroup;
-    @FXML
     private ArrayList<RadioButton> encryptionModeList;
-    
-    private Map<Algorithm, Toggle> algorithmToggleMap;
-    private Map<Toggle, Algorithm> toggleAlgorithmMap;
     
     private ExecutorService executor = Executors.newFixedThreadPool(THREADS_POOL_SIZE);
     private ObservableList<AESFileCipherJob> tableElementsList = FXCollections.observableArrayList();
     private Mode selectedBlockEncryptionMode = DEFAULT_BLOCK_ENCRYPTION_MODE;
-    private Algorithm selectedEncryptionAlgorithm = DEFAULT_ENCRYPTION_ALGORITHM;
-    private List<File> selectedFilesForEncryption;
-    private List<File> selectedFilesForDecryption;
+    private List<File> selectedFilesForEncryption = new ArrayList<>();
+    private List<File> selectedFilesForDecryption = new ArrayList<>();
     private boolean filesSelected = false;
     private int notEncryptedFilesSelected = -1;
     private int encryptedFilesSelected = -1;
     private FileChooser notEncryptedFilesChooser = new FileChooser();
     private FileChooser encryptedFilesChooser = new FileChooser();
     private Set<String> openedWindows = new HashSet<>();
-    private SessionToken sessionToken;
-    private final SimpleObjectProperty<Key> privateKeyObservable = new SimpleObjectProperty<>();
-    private final SimpleObjectProperty<byte[]> initialVectorObservable = new SimpleObjectProperty<>();
     private LoginController loginController = new LoginController();
+    private LoginManager loginManager;
 
     @FXML
     private TableColumn<AESFileCipherJob, String> fileNameColumn;
-    @FXML
-    private TableColumn<AESFileCipherJob, Boolean> isEncryptedColumn;
-    @FXML
-    private TableColumn<AESFileCipherJob, String> newFileName;
     @FXML
     private TableColumn<AESFileCipherJob, Double> progressColumn;
     @FXML
@@ -96,23 +82,26 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     @FXML
     private Label labelWithLogs;
     
+    @FXML
+    private ListSelectionView<String> selectedUsers;
     
     @FXML
     private void initialize() {
+        
         logLabel = new LogLabel(labelWithLogs, log);
     
+        try {
+            loginManager = new LoginManager();
+            refreshUsersList();
+        } catch (InstanceInitializeException e) {
+            logLabel.writeError("Failed to load available users list.");
+        }
+        
         modeToggleMap = TogglesHelper.prepareModeToggleMap(encryptionBlockTypeList);
         toggleModeMap = TogglesHelper.swapKeyValueMap(modeToggleMap);
         
-        algorithmToggleMap = TogglesHelper.prepareAlgorithmToggleMap(encryptionModeList);
-        toggleAlgorithmMap = TogglesHelper.swapKeyValueMap(algorithmToggleMap);
-        isEncryptedColumn.setEditable(true);
-        newFileName.setEditable(true);
-        filesTable.setEditable(true);
-        
         initializeFileChooser();
         refreshTable();
-        
     }
 
     private void initializeFileChooser() {
@@ -137,7 +126,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         encryptedFilesSelected = selectedFilesForEncryption.size();
         filesSelected = encryptedFilesSelected > 0;
         logLabel.writeInfo("Selected " + encryptedFilesSelected + " files for encryption.");
-        createFileJobsList(AESFileCipherJob.CipherMode.ENCRYPT);
+        createFileJobsList();
     }
     
     @FXML
@@ -151,63 +140,90 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         notEncryptedFilesSelected = selectedFilesForDecryption.size();
         filesSelected = encryptedFilesSelected > 0;
         logLabel.writeInfo("Selected " + encryptedFilesSelected + " files for decryption.");
-        createFileJobsList(AESFileCipherJob.CipherMode.ENCRYPT);
-    }
-
-    @FXML
-    void encryptFilesButtonClicked() {
-        createFileJobsList(AESFileCipherJob.CipherMode.ENCRYPT);
-        if (filesSelected) {
-            logLabel.writeInfo("Starting encryption of " + encryptedFilesSelected + " files.");
-            tableElementsList.forEach(task -> executor.submit(task));
-        }
-    }
-
-    @FXML
-    void decryptFilesButtonClicked() {
-        createFileJobsList(AESFileCipherJob.CipherMode.DECRYPT);
-        if (filesSelected) {
-            logLabel.writeInfo("Starting decryption of " + encryptedFilesSelected + " files.");
-            tableElementsList.forEach(task -> executor.submit(task));
-
-        }
+        createFileJobsList();
     }
 
     private void selectToggleMode(Mode mode) {
         //modeToggleGroup.selectToggle(modeToggleMap.get(mode));
         modeToggleMap.get(mode).setSelected(true);
     }
-
-    private void selectToggleAlgorithm(Algorithm algorithm) {
-        //algorithmToggleGroup.selectToggle(algorithmToggleMap.get(algorithm));
-        algorithmToggleMap.get(algorithm).setSelected(true);
-    }
-
-    private void refreshPrivateKey() throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance(selectedEncryptionAlgorithm.algorithmName);
-        keyGenerator.init(selectedEncryptionAlgorithm.keySize);
-
-        privateKeyObservable.setValue(keyGenerator.generateKey());
-    }
-
-    private void refreshInitialVector() {
-        if (selectedBlockEncryptionMode.initVectorRequired)
-            initialVectorObservable.setValue(SecureRandom.getSeed(selectedEncryptionAlgorithm.initVectorSize));
-        else
-            initialVectorObservable.setValue("".getBytes());
-    }
-
-    private void createFileJobsList(Mode blockMode) {
-        if (filesSelected) {
-            tableElementsList.clear();
-            selectedFilesForEncryption.forEach(file -> tableElementsList.add(prepareFileCipherJob(file, )));
+    
+    @FXML
+    public void startButtonClicked() {
+        createFileJobsList();
+        tableElementsList.forEach(job -> executor.submit(job));
+        Thread thread = new Thread(() -> {
+            try {
+                waitForJobToFinish();
+                refreshJobsStatus();
+            } catch (InterruptedException ignored) {
             
+            }
+        });
+    }
+    
+    private void refreshJobsStatus() {
+        // todo
+    }
+    
+    private void waitForJobToFinish() throws InterruptedException {
+        int counter = 0;
+        while (counter != tableElementsList.size()) {
+            for (AESFileCipherJob job : tableElementsList) {
+                if (job.isFinished())
+                    counter++;
+            }
         }
+        Thread.sleep(100);
+    }
+    
+    private void createFileJobsList() {
+        if (!loginController.isLoggedIn()) {
+            logLabel.writeError("You are not logged in!");
+            return;
+        } else if (!filesSelected) {
+            logLabel.writeError("You haven't chosen any files!");
+            return;
+        }
+    
+        tableElementsList.clear();
+        Password password = new Password(loginController.getSessionToken().getSessionKey());
+        Path currentUserPath = getCurrentUsersPath();
+    
+        selectedFilesForEncryption.forEach(file -> {
+            tableElementsList.add(prepareEncryptionFileCipherJob(file, currentUserPath, password, selectedBlockEncryptionMode));
+        });
+    
+        selectedFilesForDecryption.forEach(file -> {
+            tableElementsList.add(prepareDecryptionFileCipherJob(file, currentUserPath, password, selectedBlockEncryptionMode));
+        });
+
+//            List<String> selectedUsersList = selectedUsers.getTargetItems();
+//            selectedUsersList.forEach(selectedUser -> {
+//                addJobToTable(sessionToken, selectedUser);
+//            });
+        
         refreshTable();
     }
-
-    private AESFileCipherJob prepareFileCipherJob(File inputFile) {
     
+    private AESFileCipherJob prepareEncryptionFileCipherJob(File file, Path currentUserPath, Password password, Mode mode) {
+        FileWithMetadata fileWithMetadata = FileWithMetadata.getEncryptionInstance(file, currentUserPath, password, mode);
+        return new AESFileCipherJob(fileWithMetadata);
+    }
+    
+    private AESFileCipherJob prepareDecryptionFileCipherJob(File file, Path currentUserPath, Password password, Mode mode) {
+        try {
+            FileWithMetadata fileWithMetadata = FileWithMetadata.getDecryptionInstance(file, currentUserPath, password, mode);
+            return new AESFileCipherJob(fileWithMetadata);
+        } catch (IOException e) {
+            logLabel.writeError("Failed to read file header " + file.getName());
+            return AESFileCipherJob.getFailedInstance();
+        }
+    }
+    
+    private Path getCurrentUsersPath() {
+        String username = loginController.getUserCredentials().getUsername();
+        return ApplicationConfiguration.getSingleUserDataPath(username);
     }
     
     private void refreshTable() {
@@ -215,12 +231,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         fileNameColumn.setCellValueFactory( // file name
                 cell -> new SimpleStringProperty(cell.getValue().getFile().getName()));
 
-        isEncryptedColumn.setCellFactory( // is encrypted checkbox
-                cell -> new CheckBoxTableCell<>());
-    
-        newFileName.setCellFactory( // new file name (optional)
-                cell -> new TextFieldTableCell<>());
-        
         statusColumn.setCellValueFactory( // status information
                 cell -> cell.getValue().getStatusProperty());
 
@@ -232,7 +242,6 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
 
         
         filesTable.setItems(tableElementsList);
-        filesTable.setEditable(true);
     }
 
     @FXML
@@ -288,24 +297,7 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
 
         if (toggleModeMap.containsKey(rb)) {
             selectedBlockEncryptionMode = toggleModeMap.get(rb);
-            refreshInitialVector();
             logLabel.writeInfo("Selected block mode type: " + selectedBlockEncryptionMode.fullName);
-        }
-        else {
-            logLabel.writeError("Illegal toggle selected: " + event.getSource().toString());
-            throw new IllegalEventSourceException(event.getSource().toString());
-        }
-    }
-
-    @FXML
-    public void algorithmSelected(ActionEvent event) throws IllegalEventSourceException, NoSuchAlgorithmException {
-        Toggle rb = (Toggle) event.getSource();
-
-        if (toggleAlgorithmMap.containsKey(rb)) {
-            selectedEncryptionAlgorithm = toggleAlgorithmMap.get(rb);
-            refreshPrivateKey();
-            refreshInitialVector();
-            logLabel.writeInfo("Selected encryption algorithm type: " + selectedEncryptionAlgorithm.algorithmName);
         }
         else {
             logLabel.writeError("Illegal toggle selected: " + event.getSource().toString());
@@ -317,6 +309,8 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
     public void windowClosed(String callerClassName) {
         if (!openedWindows.remove(callerClassName))
             throw new UnexpectedWindowEventCall("Class name: " + callerClassName);
+    
+        refreshUsersList();
     }
 
     @Override
@@ -329,8 +323,24 @@ public class MainWindowController extends JavaFXController implements JavaFXWind
         throw new NotImplementedException("This controller can't have parent controllers.");
     }
     
+    private void refreshUsersList() {
+        List<String> usersList = loginManager.getUsersList();
+        selectedUsers.getSourceItems().clear();
+        selectedUsers.getTargetItems().clear();
+        selectedUsers.getSourceItems().addAll(usersList);
+    }
+    
     public void loginUser(SessionToken sessionToken) {
         loginController.login(sessionToken);
         logLabel.writeInfo("New session token valid until: " + sessionToken.getSessionValidUntil().toString());
+        Thread thread = new Thread(sessionToken);
+        thread.start();
+    }
+    
+    @FXML
+    public void clearListButtonClicked() {
+        tableElementsList.clear();
+        selectedFilesForEncryption.clear();
+        selectedFilesForDecryption.clear();
     }
 }

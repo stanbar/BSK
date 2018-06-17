@@ -1,11 +1,13 @@
 package com.milbar.gui;
 
 import com.milbar.gui.abstracts.factories.LoggerFactory;
+import com.milbar.logic.exceptions.InstanceInitializeException;
 import com.milbar.logic.exceptions.LoginException;
 import com.milbar.logic.exceptions.RegisterException;
 import com.milbar.logic.exceptions.UnexpectedWindowEventCall;
 import com.milbar.logic.login.LoginManager;
 import com.milbar.logic.login.wrappers.SessionToken;
+import com.milbar.logic.security.wrappers.Password;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -31,7 +33,7 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     
     private Stage stage;
     private boolean loginAllowed = true;
-    private LoginManager loginManager = new LoginManager();
+    private LoginManager loginManager;
     
     @FXML
     private TextField usernameField;
@@ -47,9 +49,14 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     
     @FXML
     public void initialize() {
-        List<String> usersList = loginManager.getUsersList();
-        if (usersList != null && usersList.size() > 0)
-            TextFields.bindAutoCompletion(usernameField, usersList).setDelay(AUTOCOMPLETION_DELAY);
+        try {
+            loginManager = new LoginManager();
+            List<String> usersList = loginManager.getUsersList();
+            if (usersList != null && usersList.size() > 0)
+                TextFields.bindAutoCompletion(usernameField, usersList).setDelay(AUTOCOMPLETION_DELAY);
+        } catch (InstanceInitializeException e) {
+            log.log(Level.SEVERE, "Failed to initialize login window.");
+        }
     }
     
     @FXML
@@ -87,7 +94,8 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     }
     
     private void handleUserLoginEvent(String username, String password) throws LoginException {
-        SessionToken sessionToken = loginManager.login(username, password);
+        Password wrappedPassword = new Password(password.toCharArray());
+        SessionToken sessionToken = loginManager.login(username, wrappedPassword);
         parentController.loginUser(sessionToken);
         closeWindow();
     }
@@ -154,7 +162,8 @@ public class LoginWindowController extends JavaFXController implements JavaFXWin
     }
     
     void registerNewUser(String username, String password) throws RegisterException {
-        loginManager.register(username, password);
+        Password wrappedPassword = new Password(password.toCharArray());
+        loginManager.register(username, wrappedPassword);
     }
     
     @Override

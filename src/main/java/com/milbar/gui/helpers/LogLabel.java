@@ -3,6 +3,7 @@ package com.milbar.gui.helpers;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,8 +30,9 @@ public class LogLabel {
     }
     
     private void write(String log, Level level) {
+        Date date = new Date();
         Platform.runLater(() -> {
-            label.setText(log);
+            label.setText(date.toString() + ": " + log);
             label.setStyle(getColorStyle(level));
         });
         logger.log(level, log);

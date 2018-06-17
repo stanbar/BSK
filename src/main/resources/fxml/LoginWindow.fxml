@@ -11,6 +11,7 @@
             <font>
                 <Font name="Times New Roman" size="28.0" />
             </font></Label>
+        <TextField fx:id="usernameField" layoutX="98.0" layoutY="100.0" promptText="Username" />
         <PasswordField fx:id="passwordField" layoutX="98.0" layoutY="137.0" onAction="#loginButtonClicked" onKeyReleased="#passwordEntered" promptText="Password" styleClass="text-field" />
         <Button layoutX="161.0" layoutY="198.0" mnemonicParsing="false" onAction="#loginButtonClicked" prefHeight="30.0" prefWidth="113.0" styleClass="button" stylesheets="@../css/LoginWindow.css" text="Log in" />
         <Button layoutX="67.0" layoutY="198.0" mnemonicParsing="false" onAction="#cancelButtonClicked" prefHeight="30.0" prefWidth="77.0" styleClass="button" stylesheets="@../css/LoginWindow.css" text="Cancel" />
@@ -22,6 +23,5 @@
             <Image url="@../images/password.png" />
         </ImageView>
       <Button layoutX="66.0" layoutY="236.0" mnemonicParsing="false" onAction="#registerButtonClicked" styleClass="register-button" stylesheets="@../css/LoginWindow.css" text="Don't have an account? Register here" />
-      <TextField fx:id="usernameField" layoutX="98.0" layoutY="100.0" promptText="Username" />
     </children>
 </AnchorPane>

@@ -81,20 +81,18 @@ public class StreamCryptography implements EncryptionStream, DecryptionStream {
     }
     
     @Override
-    public String decryptStream(Password password) throws DecryptionException {
+    public void decryptStream(Password password) throws DecryptionException {
         try {
-            return decryptAESStream(password);
+            decryptAESStream(password);
         } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | InvalidAlgorithmParameterException | InvalidKeySpecException exception) {
             throw new DecryptionException(exception);
         }
     }
     
-    private String decryptAESStream(Password password) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException {
+    private void decryptAESStream(Password password) throws InvalidKeySpecException, InvalidAlgorithmParameterException, NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IOException {
         AESCipherFactory aesCipherFactory = CipherHeaderManager.readCipherData(inputStream);
-        String originalFileExtension = aesCipherFactory.getOriginalFileExtension();
         Cipher cipher = aesCipherFactory.getCipher(password.getSecret(), Cipher.DECRYPT_MODE);
         decryptStream(cipher);
-        return originalFileExtension;
     }
     
     @Override
@@ -112,8 +110,8 @@ public class StreamCryptography implements EncryptionStream, DecryptionStream {
     private void decryptStream(Cipher cipher) throws IOException {
         try (CipherOutputStream cipherOutputStream = new CipherOutputStream(outputStream, cipher);
              ProgressInputStream progressInputStream = new ProgressInputStream(inputStream, jobToUpdateProgress, inputStream.available())) {
-            
-            inputStream.transferTo(cipherOutputStream);
+    
+            progressInputStream.transferTo(cipherOutputStream);
         }
     }
     

@@ -1,10 +1,10 @@
 package com.milbar.gui.helpers;
 
-import com.milbar.logic.abstracts.Algorithm;
-import com.milbar.logic.exceptions.UserIsNotLoggedIn;
 import com.milbar.logic.login.wrappers.SessionToken;
+import com.milbar.logic.login.wrappers.UserCredentials;
 
 public class LoginController {
+    
     
     SessionToken sessionToken = null;
     
@@ -26,10 +26,15 @@ public class LoginController {
         }
     }
     
-    public void getInitialVector(Mode mode, Algorithm algorithm) throws UserIsNotLoggedIn {
-        if (sessionToken == null)
-            throw new UserIsNotLoggedIn("Cannot return initialize vector without session token.");
-        
-        
+    public SessionToken getSessionToken() {
+        return sessionToken;
     }
+    
+    public UserCredentials getUserCredentials() {
+        if (sessionToken != null)
+            return sessionToken.getUserCredentials();
+        else
+            return null;
+    }
+    
 }

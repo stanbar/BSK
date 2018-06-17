@@ -75,27 +75,28 @@ public class UsersManager {
             AESEncryptedObject<UserCredentials> encryptedCredentials;
             encryptedCredentials = objectCryptography.encryptObject(userCredentials, password, Mode.CBC);
             usersCollection.updateCollection(username, encryptedCredentials);
+            usersPublicKeys.updateCollection(username, userCredentials.getPublicKey());
         } catch (EncryptionException | WritingSerializedFileException e) {
             throw new RegisterException("Failed to register a new user.");
         }
     }
     
-    void removeUser(String username, Password password) throws UserRemoveException {
-        AESEncryptedObject<UserCredentials> usersCredentials = usersCollection.getValue(username);
-        if (usersCredentials == null)
-            throw new UserRemoveException("Failed to remove user, because there is not user with name: " + username);
-        
-        try {
-            UserCredentials decryptedUserCredentials = objectCryptography.decryptObject(usersCredentials, password);
-            if (decryptedUserCredentials.getUsername().equals(username)) {
-                usersCollection.removeItem(username);
-            }
-        } catch (DecryptionException e) {
-            throw new UserRemoveException("Given password does not match.");
-        } catch (WritingSerializedFileException e) {
-            throw new UserRemoveException("Failed to remove user from collection.");
-        }
-    }
+//    void removeUser(String username, Password password) throws UserRemoveException {
+//        AESEncryptedObject<UserCredentials> usersCredentials = usersCollection.getValue(username);
+//        if (usersCredentials == null)
+//            throw new UserRemoveException("Failed to remove user, because there is not user with name: " + username);
+//
+//        try {
+//            UserCredentials decryptedUserCredentials = objectCryptography.decryptObject(usersCredentials, password);
+//            if (decryptedUserCredentials.getUsername().equals(username)) {
+//                usersCollection.removeItem(username);
+//            }
+//        } catch (DecryptionException e) {
+//            throw new UserRemoveException("Given password does not match.");
+//        } catch (WritingSerializedFileException e) {
+//            throw new UserRemoveException("Failed to remove user from collection.");
+//        }
+//    }
 
     SessionToken loginUser(String username, Password password) throws UserDoesNotExist, UsersPasswordNotValid {
         AESEncryptedObject<UserCredentials> userCredentials = usersCollection.getValue(username);

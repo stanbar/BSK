@@ -14,7 +14,7 @@ public interface DecryptionStream {
      * @throws DecryptionException If there is any error in decryption, then it is caught and thrown as
      *                             DecryptionException, with it's original or custom message.
      */
-    String decryptStream(Password password) throws DecryptionException;
+    void decryptStream(Password password) throws DecryptionException;
     
     /**
      * This method is used for decryption of encrypted data in given input stream. The encryption algorithm must be RSA.

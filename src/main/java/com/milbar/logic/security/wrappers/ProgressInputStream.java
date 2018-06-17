@@ -20,19 +20,11 @@ public class ProgressInputStream extends InputStream {
         this.listener.initializeProgress(total);
         this.total = total;
     }
-    
-    /**
-     * Gets the total number of bytes that are expected to be read from the stream.
-     * @return the total number of bytes.
-     */
+
     public long getTotal() {
         return this.total;
     }
-    
-    /**
-     * Sets the total number of bytes that are expected to be read from the stream.
-     * @param total the total number of bytes
-     */
+
     public void setTotal(long total) {
         this.total = total;
     }
