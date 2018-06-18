@@ -9,6 +9,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RegisterWindowController extends JavaFXController {
     
@@ -28,6 +30,10 @@ public class RegisterWindowController extends JavaFXController {
     @FXML
     public Label errorLabel;
     
+    private Pattern bigSmallLetters = Pattern.compile("[a-zA-z]");
+    private Pattern digits = Pattern.compile("[0-9]");
+    private Pattern specialCharacters = Pattern.compile ("[!@#$%&*()_+=|<>?{}\\[\\]~-]");
+    
     @FXML
     public void registerButtonClicked() {
         if (userNameField.getLength() > 0 && passwordField.getLength() > 0 && passwordFieldRepeat.getLength() > 0) {
@@ -43,11 +49,23 @@ public class RegisterWindowController extends JavaFXController {
     private void registerUser(String username, String password) {
         try {
             clearInputFields();
+            if (!isPasswordStrongEnough(password))
+                throw new RegisterException("Password is not strong enough (!aA1234678)");
             parentController.registerNewUser(username, password);
             closeWindow();
         } catch (RegisterException e) {
             inputValidationFailed(e.getMessage());
         }
+    }
+    
+    private boolean isPasswordStrongEnough(String password) {
+        if (password.length() < 8)
+            return false;
+        Matcher hasLetter = bigSmallLetters.matcher(password);
+        Matcher hasDigit = digits.matcher(password);
+        Matcher hasSpecial = specialCharacters.matcher(password);
+        
+        return hasLetter.find() && hasDigit.find() && hasSpecial.find();
     }
     
     private void clearInputFields() {
