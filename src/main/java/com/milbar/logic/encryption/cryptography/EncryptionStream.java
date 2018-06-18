@@ -31,6 +31,7 @@ public interface EncryptionStream {
      *
      * @param fileExtension
      * @param password
+     * @param approvedUsers
      * @param blockModeType
      * @throws EncryptionException
      */
